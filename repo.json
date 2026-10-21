@@ -7,10 +7,10 @@
   },
   "packages": [
     {
-      "title": "Homeframe",
-      "manifestUrl": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/homeframe.manifest.json",
+      "iconUri": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/icon.png",
       "id": "com.homeframe.launcher",
-      "iconUri": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/icon.png"
+      "manifestUrl": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/homeframe.manifest.json",
+      "title": "The Bazaar"
     }
   ]
 }

@@ -1,15 +1,13 @@
-# Homeframe for webOS TV
+# The Bazaar for webOS TV
 
-A simple remote-controlled launcher for LG webOS TV. It has live shortcuts to Bazaar Home, Continue watching, Watchlist, Favourites, My lists, New episodes, Release calendar, Live & guide, and Library, plus Netflix, Prime Video, YouTube, Disney+, and Live TV app buttons.
+This replaces Homeframe with a standalone full-screen The Bazaar app. The app opens the Bazaar compatibility home directly with no Homeframe menus, app dock, external scripts, or local server.
 
-## Install from Homebrew Channel
+## Install or update
 
-Add this repository URL in Homebrew Channel:
+In Homebrew Channel, refresh the existing repository and choose Update for The Bazaar (app ID `com.homeframe.launcher`). The repository URL remains:
 
 `https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/repo.json`
 
-Select Homeframe and choose Install or Update.
+## Sign in
 
-## Use
-
-Use the remote arrows and OK button. Sign into Bazaar in the TV browser first. The list shortcuts open Bazaar's live pages, so they show the account's current data. App availability and IDs vary by TV and region. Bazaar uses HTTP; use it only on a trusted home network.
+Sign in from the TV app if prompted. A desktop browser session is not shared with the TV. The NAS page uses HTTP; use it only on a trusted home network.
