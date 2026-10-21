@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>URL Viewer</title>
+  <style>
+    :root { font-family: Arial, sans-serif; color: #f5f7fb; background: #080b12; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; }
+    main { width: min(980px, 90vw); padding: 56px; border: 1px solid #27364c; border-radius: 24px; background: #111a28; }
+    h1 { margin: 0 0 16px; font-size: 48px; }
+    p { margin: 0 0 28px; color: #b5c2d2; font-size: 24px; }
+    form { display: flex; gap: 16px; flex-wrap: wrap; }
+    input, button { min-height: 76px; border: 2px solid #465c78; border-radius: 12px; font: inherit; font-size: 27px; }
+    input { flex: 1; min-width: 0; padding: 0 22px; color: #101722; background: #fff; }
+    button { padding: 0 30px; color: #07111e; background: #78d5ff; border-color: #78d5ff; font-weight: 700; cursor: pointer; }
+    button.secondary { color: #f5f7fb; background: #26364c; border-color: #465c78; }
+    input:focus, button:focus { outline: 4px solid #fff; outline-offset: 3px; }
+    #message { min-height: 30px; margin: 18px 0 0; color: #ffbdad; font-size: 20px; }
+    @media (max-width: 700px) { main { padding: 30px; } form { flex-direction: column; } input, button { width: 100%; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>URL Viewer</h1>
+    <p>Enter a website address to open it on your TV.</p>
+    <form id="open-form">
+      <input id="address" type="text" inputmode="url" autocomplete="url" placeholder="https://example.com" aria-label="Website address" autofocus>
+      <button type="submit">Open</button>
+      <button id="save-default" class="secondary" type="button">Save as default</button>
+      <button id="clear-default" class="secondary" type="button">Clear default</button>
+    </form>
+    <div id="message" role="status" aria-live="polite"></div>
+  </main>
+  <script>
+    const form = document.getElementById('open-form');
+    const address = document.getElementById('address');
+    const message = document.getElementById('message');
+    address.value = localStorage.getItem('urlviewer.defaultAddress') || localStorage.getItem('urlviewer.lastAddress') || '';
+
+    function getValidAddress() {
+      let value = address.value.trim();
+      if (!value) throw new Error('Enter a website address first.');
+      if (!/^https?:\/\//i.test(value)) value = `https://${value}`;
+      let url;
+      try { url = new URL(value); } catch (_) { throw new Error('That address does not look valid.'); }
+      if (!['http:', 'https:'].includes(url.protocol) || !url.hostname.includes('.')) {
+        throw new Error('Use a full website address, such as https://example.com.');
+      }
+      return url;
+    }
+
+    document.getElementById('save-default').addEventListener('click', () => {
+      try {
+        const url = getValidAddress();
+        localStorage.setItem('urlviewer.defaultAddress', url.href);
+        address.value = url.href;
+        message.textContent = 'Saved as the default page for next time.';
+      } catch (error) {
+        message.textContent = error.message;
+        address.focus();
+      }
+    });
+
+    document.getElementById('clear-default').addEventListener('click', () => {
+      localStorage.removeItem('urlviewer.defaultAddress');
+      message.textContent = 'Default page cleared.';
+    });
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      let url;
+      try { url = getValidAddress(); } catch (error) {
+        message.textContent = error.message;
+        address.focus();
+        return;
+      }
+      address.value = url.href;
+      localStorage.setItem('urlviewer.lastAddress', url.href);
+      window.location.assign(url.href);
+    });
+  </script>
+</body>
+</html>

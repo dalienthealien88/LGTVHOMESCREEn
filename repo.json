@@ -1,9 +1,9 @@
 {
   "paging": {
     "page": 1,
-    "count": 1,
+    "count": 2,
     "maxPage": 1,
-    "itemsTotal": 1
+    "itemsTotal": 2
   },
   "packages": [
     {
@@ -11,6 +11,12 @@
       "id": "com.homeframe.launcher",
       "manifestUrl": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/homeframe.manifest.json",
       "title": "The Bazaar"
+    },
+    {
+      "iconUri": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/icon-urlviewer.png",
+      "id": "com.lgtv.urlviewer",
+      "manifestUrl": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/urlviewer.manifest.json",
+      "title": "URL Viewer"
     }
   ]
 }
