@@ -1,13 +1,13 @@
 {
   "title": "Homeframe",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "ipkUrl": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/Homeframe.ipk",
-  "appDescription": "A calmer home for your TV apps",
+  "appDescription": "Immersive TV home with The Bazaar, live guide, and native app shortcuts",
   "type": "web",
   "sourceUrl": "https://github.com/dalienthealien88/LGTVHOMESCREEn",
   "iconUri": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/icon.png",
   "ipkHash": {
-    "sha256": "83deada83c2d2a59fe60042c21e44ed3c58d73133b2d1ae5ab9deead1634cad4"
+    "sha256": "7641c582148347bcdf940e5ca100290604b8d54f64dfba7e4b6ffccc6f2062eb"
   },
   "id": "com.homeframe.launcher"
 }
