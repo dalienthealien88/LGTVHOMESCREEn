@@ -1,27 +1,15 @@
 # Homeframe for webOS TV
 
-A standalone immersive TV home for LG webOS TV (version 2.0.1). It places The Bazaar compatibility interface at the center, with live TV, IPTV, radio, EPG, watchlist, release calendar, new episodes, library browsing, and a native app dock. It does not replace LG Home.
+A basic remote-controlled launcher for LG webOS TV. It has buttons for The Bazaar (opened in the TV browser), Netflix, Prime Video, YouTube, Disney+, and Live TV. It does not replace LG Home.
 
 ## Install from Homebrew Channel
 
-In Homebrew Channel, add this repository URL:
+Add this repository URL in Homebrew Channel:
 
 `https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/repo.json`
 
-Open the Homeframe listing and choose Install. Homebrew Channel downloads the IPK from this repository and checks the SHA-256 value in the manifest.
-
-## Files
-
-- `Homeframe.ipk` — installable app package
-- `homeframe.manifest.json` — Homebrew package metadata and package checksum
-- `repo.json` — one-app Homebrew repository index
-- `icon.png` — app/repository icon
-- `Homeframe-source.zip` — editable app source
+Select Homeframe and choose Install or Update.
 
 ## Use
 
-After installation, launch Homeframe from the TV app launcher. Sign into The Bazaar on the TV if asked; the desktop browser session is not shared. Netflix, Prime Video, YouTube, Disney+, and Live TV shortcuts use webOS app IDs that can be changed in Apps.
-
-The supplied Bazaar address uses HTTP. Do not enter a password over an untrusted network; configure HTTPS before using credentials over the public internet. Version 2.0.1 removes JavaScript and DOM features that older webOS TV browsers may not support. Verify launch and remote control on the target TV. Home-screen takeover is not included.
-
-
+Use the remote arrows and OK button. App availability and IDs vary by TV and region. The Bazaar address uses HTTP; use it only on a trusted home network.
