@@ -1,13 +1,13 @@
 {
   "title": "The Bazaar",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "ipkUrl": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/Homeframe.ipk",
-  "appDescription": "The Bazaar full-screen TV app",
+  "appDescription": "The Bazaar compatible full-screen TV app",
   "type": "web",
   "sourceUrl": "https://github.com/dalienthealien88/LGTVHOMESCREEn",
   "iconUri": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/icon.png",
   "ipkHash": {
-    "sha256": "fd7ff5d8f9c92b92024394286da9f9622c4e356426b199769eb9fb708833a5d5"
+    "sha256": "612aa5e2b796835dcce3f8d4e2c3b22a55bd88e0f66de02300696f8816edfaec"
   },
   "id": "com.homeframe.launcher"
 }
