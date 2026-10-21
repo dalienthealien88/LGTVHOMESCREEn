@@ -1,6 +1,6 @@
 # The Bazaar for webOS TV
 
-A full-screen webOS app that opens The Bazaar's full interface directly, allowing pointer-style navigation where supported by the TV remote. Sign in on The Bazaar page so the site handles its own login and session; the app does not collect or store passwords.
+A full-screen webOS app that opens The Bazaar in compatibility mode, which uses the site's TV-oriented navigation. Sign in on The Bazaar page so the site handles its own login and session; the app does not collect or store passwords.
 
 ## Install or update
 
