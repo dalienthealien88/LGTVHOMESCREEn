@@ -34,10 +34,11 @@
 <body>
   <main>
     <h1>URL Viewer</h1>
-    <p>Enter a website address to open it on your TV.</p>
+    <p>Open a website directly, or try the embedded view.</p>
     <form id="open-form">
       <input id="address" type="text" inputmode="url" autocomplete="url" placeholder="https://example.com" aria-label="Website address" autofocus>
       <button type="submit">Open</button>
+      <button id="try-embedded" class="secondary" type="button">Try embedded</button>
       <button id="save-default" class="secondary" type="button">Save as default</button>
       <button id="clear-default" class="secondary" type="button">Clear default</button>
     </form>
@@ -72,6 +73,20 @@
       return url;
     }
 
+    function rememberUrl(url) {
+      address.value = url.href;
+      currentUrl = url;
+      localStorage.setItem('urlviewer.lastAddress', url.href);
+    }
+
+    function openEmbedded(url) {
+      rememberUrl(url);
+      document.getElementById('page-address').textContent = url.href;
+      document.body.classList.add('viewing');
+      frame.src = url.href;
+      frame.focus();
+    }
+
     document.getElementById('save-default').addEventListener('click', () => {
       try {
         const url = getValidAddress();
@@ -99,6 +114,16 @@
       if (currentUrl) window.location.assign(currentUrl.href);
     });
 
+    document.getElementById('try-embedded').addEventListener('click', () => {
+      let url;
+      try { url = getValidAddress(); } catch (error) {
+        message.textContent = error.message;
+        address.focus();
+        return;
+      }
+      openEmbedded(url);
+    });
+
     form.addEventListener('submit', (event) => {
       event.preventDefault();
       let url;
@@ -107,13 +132,8 @@
         address.focus();
         return;
       }
-      address.value = url.href;
-      currentUrl = url;
-      localStorage.setItem('urlviewer.lastAddress', url.href);
-      document.getElementById('page-address').textContent = url.href;
-      document.body.classList.add('viewing');
-      frame.src = url.href;
-      frame.focus();
+      rememberUrl(url);
+      window.location.assign(url.href);
     });
   </script>
 </body>
