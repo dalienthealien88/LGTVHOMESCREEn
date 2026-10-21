@@ -1,13 +1,13 @@
 {
   "title": "Homeframe",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "ipkUrl": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/Homeframe.ipk",
-  "appDescription": "Simple webOS TV app launcher",
+  "appDescription": "Simple launcher with live Bazaar content lists and TV apps",
   "type": "web",
   "sourceUrl": "https://github.com/dalienthealien88/LGTVHOMESCREEn",
   "iconUri": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/icon.png",
   "ipkHash": {
-    "sha256": "de4a2038b886c5d3dcecb494d1d76ade133489daf69df2fcfca1664bd369b28a"
+    "sha256": "5d40b436dc9ce3e385a1092039f528ba8670216cc61cf366e85244a9bb1513ab"
   },
   "id": "com.homeframe.launcher"
 }
