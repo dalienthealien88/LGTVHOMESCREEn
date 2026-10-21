@@ -1,0 +1,16 @@
+{
+  "paging": {
+    "page": 1,
+    "count": 1,
+    "maxPage": 1,
+    "itemsTotal": 1
+  },
+  "packages": [
+    {
+      "title": "Homeframe",
+      "manifestUrl": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/homeframe.manifest.json",
+      "id": "com.homeframe.launcher",
+      "iconUri": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/icon.png"
+    }
+  ]
+}
