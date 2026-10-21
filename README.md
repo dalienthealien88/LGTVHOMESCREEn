@@ -1,6 +1,6 @@
 # The Bazaar for webOS TV
 
-A full-screen webOS app with a remote-friendly sign-in form. It submits sign-in directly to The Bazaar server; successful login opens the compatibility home. The app does not store passwords.
+A full-screen webOS app that opens The Bazaar compatibility site directly. Sign in on The Bazaar page so the site handles its own login and session; the app does not collect or store passwords.
 
 ## Install or update
 
