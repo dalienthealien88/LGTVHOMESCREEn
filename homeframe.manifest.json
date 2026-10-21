@@ -1,13 +1,13 @@
 {
   "title": "Homeframe",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "ipkUrl": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/Homeframe.ipk",
   "appDescription": "A calmer home for your TV apps",
   "type": "web",
   "sourceUrl": "https://github.com/dalienthealien88/LGTVHOMESCREEn",
   "iconUri": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/icon.png",
   "ipkHash": {
-    "sha256": "42071e6280b59af6ffd4b8ffbd36228525e99104874fde62fc1210ad7ce7f71f"
+    "sha256": "83deada83c2d2a59fe60042c21e44ed3c58d73133b2d1ae5ab9deead1634cad4"
   },
   "id": "com.homeframe.launcher"
 }

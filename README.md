@@ -1,6 +1,6 @@
 # Homeframe for webOS TV
 
-A standalone, remote-friendly launcher demo for LG webOS TV. It does not replace LG Home.
+A standalone launcher demo for LG webOS TV with directional remote navigation (version 1.0.1). It does not replace LG Home.
 
 ## Install from Homebrew Channel
 
@@ -23,3 +23,4 @@ Open the Homeframe listing and choose Install. Homebrew Channel downloads the IP
 After installation, launch Homeframe from the TV app launcher. The TV remote Home button continues to return to LG Home. App names and IDs can be edited inside Homeframe.
 
 This is a demo build and has not yet been verified on the target TV. Home-screen takeover is not included.
+
