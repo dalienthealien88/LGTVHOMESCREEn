@@ -19,6 +19,15 @@
     button.secondary { color: #f5f7fb; background: #26364c; border-color: #465c78; }
     input:focus, button:focus { outline: 4px solid #fff; outline-offset: 3px; }
     #message { min-height: 30px; margin: 18px 0 0; color: #ffbdad; font-size: 20px; }
+    #viewer { position: fixed; inset: 0; display: none; background: #080b12; }
+    #toolbar { height: 68px; display: flex; align-items: center; gap: 12px; padding: 8px 16px; background: #111a28; }
+    #toolbar button { min-height: 48px; font-size: 20px; }
+    #page-address { flex: 1; min-width: 0; overflow: hidden; color: #d8e3f0; font-size: 18px; text-overflow: ellipsis; white-space: nowrap; }
+    #page-frame { display: block; width: 100%; height: calc(100% - 102px); border: 0; background: #fff; cursor: auto; }
+    #frame-note { padding: 8px 16px; color: #d8e3f0; background: #26364c; font-size: 16px; }
+    body.viewing { display: block; }
+    body.viewing main { display: none; }
+    body.viewing #viewer { display: block; }
     @media (max-width: 700px) { main { padding: 30px; } form { flex-direction: column; } input, button { width: 100%; } }
   </style>
 </head>
@@ -34,10 +43,21 @@
     </form>
     <div id="message" role="status" aria-live="polite"></div>
   </main>
+  <section id="viewer" aria-label="Website viewer">
+    <div id="toolbar">
+      <button id="back-to-address" class="secondary" type="button">Back to address</button>
+      <div id="page-address"></div>
+      <button id="open-full-page" class="secondary" type="button">Open full page</button>
+    </div>
+    <div id="frame-note" role="status">If this page is blank, use Open full page. Pointer visibility may depend on the website.</div>
+    <iframe id="page-frame" title="Website" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+  </section>
   <script>
     const form = document.getElementById('open-form');
     const address = document.getElementById('address');
     const message = document.getElementById('message');
+    const frame = document.getElementById('page-frame');
+    let currentUrl = null;
     address.value = localStorage.getItem('urlviewer.defaultAddress') || localStorage.getItem('urlviewer.lastAddress') || '';
 
     function getValidAddress() {
@@ -69,6 +89,16 @@
       message.textContent = 'Default page cleared.';
     });
 
+    document.getElementById('back-to-address').addEventListener('click', () => {
+      frame.src = 'about:blank';
+      document.body.classList.remove('viewing');
+      address.focus();
+    });
+
+    document.getElementById('open-full-page').addEventListener('click', () => {
+      if (currentUrl) window.location.assign(currentUrl.href);
+    });
+
     form.addEventListener('submit', (event) => {
       event.preventDefault();
       let url;
@@ -78,8 +108,12 @@
         return;
       }
       address.value = url.href;
+      currentUrl = url;
       localStorage.setItem('urlviewer.lastAddress', url.href);
-      window.location.assign(url.href);
+      document.getElementById('page-address').textContent = url.href;
+      document.body.classList.add('viewing');
+      frame.src = url.href;
+      frame.focus();
     });
   </script>
 </body>

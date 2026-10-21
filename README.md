@@ -14,7 +14,7 @@ Use the remote arrows to focus Username and Password, press OK to type, then sel
 
 ## URL Viewer
 
-URL Viewer lets you enter and open a website address on the TV. Choose **Save as default** to prefill that page next time, or **Clear default** to remove it. It remembers the last opened address when no default is set. The app does not save passwords; sites may keep their own sign-in session if webOS preserves their cookies.
+URL Viewer lets you enter and open a website address on the TV inside the app. The app controls remain available; choose **Open full page** if a site blocks embedded viewing. Some websites may hide the pointer themselves. Choose **Save as default** to prefill that page next time, or **Clear default** to remove it. It remembers the last opened address when no default is set. The app does not save passwords; sites may keep their own sign-in session if webOS preserves their cookies.
 
 In Homebrew Channel, refresh the repository and install **URL Viewer** (app ID `com.lgtv.urlviewer`). The repository URL is:
 
