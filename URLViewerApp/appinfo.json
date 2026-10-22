@@ -1,11 +1,11 @@
 {
   "id": "com.lgtv.urlviewer",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "vendor": "LGTV Homebrew",
   "type": "web",
   "main": "index.html",
   "title": "URL Viewer",
-  "icon": "icon.png",
+  "icon": "urlviewer-icon-1.0.4.png",
   "appDescription": "Open a website address on your LG webOS TV",
   "resolution": "1920x1080",
   "requiredMemory": 16,

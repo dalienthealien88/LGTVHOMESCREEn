@@ -61,4 +61,4 @@ const png = Buffer.concat([
   chunk('IDAT', zlib.deflateSync(Buffer.concat(rows))),
   chunk('IEND', Buffer.alloc(0))
 ]);
-fs.writeFileSync(path.join(__dirname, 'icon.png'), png);
+fs.writeFileSync(path.join(__dirname, 'urlviewer-icon-1.0.4.png'), png);
