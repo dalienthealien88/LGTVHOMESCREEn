@@ -1,13 +1,13 @@
 {
   "title": "The Bazaar",
-  "version": "3.0.6",
+  "version": "3.0.7",
   "ipkUrl": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/Homeframe.ipk",
   "appDescription": "The Bazaar webOS app with compatibility navigation",
   "type": "web",
   "sourceUrl": "https://github.com/dalienthealien88/LGTVHOMESCREEn",
   "iconUri": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/icon.png",
   "ipkHash": {
-    "sha256": "762573e98055b4c846aa8f71af1f3ce71edeeb79722d6f06e20f06fcd0d273c1"
+    "sha256": "2a69808e739477583015c0e94d76d76ac59fae45046b389e7f03d95d59a023eb"
   },
   "id": "com.homeframe.launcher"
 }
