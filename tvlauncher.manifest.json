@@ -1,13 +1,13 @@
 {
   "title": "TV Launcher",
-  "version": "1.0.6",
-  "ipkUrl": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/35a363096f54709eb774d836403dd59947ec2d77/TVLauncher.ipk",
+  "version": "1.0.7",
+  "ipkUrl": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/89b2d09e1ef0bc6940231a63fb1aa06e2a2370f7/TVLauncher.ipk",
   "appDescription": "A custom TV launcher with an app carousel, weather, clock, and settings",
   "type": "web",
   "sourceUrl": "https://github.com/dalienthealien88/LGTVHOMESCREEn",
   "iconUri": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/TVLauncherApp/icon.png",
   "ipkHash": {
-    "sha256": "05074530f63ca3fdfa5699675ee5991f224921d6053da3aad6f23bd7caeace4f"
+    "sha256": "9b73cd7e644c5bd297923cdb1762587b91621291e78c37957c575e6fd3232335"
   },
   "id": "com.lgtv.tvlauncher"
 }
