@@ -93,7 +93,8 @@
         const url = getValidAddress();
         localStorage.setItem('urlviewer.defaultAddress', url.href);
         address.value = url.href;
-        message.textContent = 'Saved as the default page for next time.';
+        message.textContent = 'Default saved. Opening it now…';
+        window.location.assign(url.href);
       } catch (error) {
         message.textContent = error.message;
         address.focus();
@@ -136,6 +137,15 @@
       rememberUrl(url);
       window.location.assign(url.href);
     });
+
+    if (defaultAddress) {
+      try {
+        window.location.assign(getValidAddress().href);
+      } catch (error) {
+        message.textContent = error.message;
+        address.focus();
+      }
+    }
 
   </script>
 </body>
