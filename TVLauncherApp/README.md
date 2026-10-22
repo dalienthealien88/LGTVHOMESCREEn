@@ -9,14 +9,14 @@ A separate, custom TV-friendly launcher built as a new app alongside the existin
 - weather + clock widgets
 - launcher settings tile in the app grid
 - add/remove apps with local persistence
-- select apps from the TV's webOS Application Manager app list through the Homebrew Channel service, with direct API fallbacks
+- select non-system apps from the TV's webOS Application Manager app list through the Homebrew Channel service, with direct API fallbacks
 - add custom URLs or webOS app IDs
 - remote-friendly D-pad navigation
 - D-pad navigation through the app carousel and launcher settings
 - TV remote Back button closes launcher settings and returns focus to the selected app
 - app launch support for URLs and webOS app IDs
 
-Installed-app discovery uses the Homebrew Channel service and requires Homebrew root to be enabled. Adding an app by ID remains available without discovery.
+Installed-app discovery uses the Homebrew Channel service and requires Homebrew root to be enabled. The picker excludes system apps and the launcher itself. Adding an app by ID remains available without discovery.
 
 ## Files
 
