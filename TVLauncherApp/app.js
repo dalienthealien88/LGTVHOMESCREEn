@@ -183,7 +183,11 @@ function loadInstalledApps() {
 
   const setInstalledApps = (availableApps) => {
     installedApps = availableApps
-      .filter((app) => app && typeof app.id === 'string' && app.id && app.id !== 'com.lgtv.tvlauncher')
+      .filter((app) => app
+        && typeof app.id === 'string'
+        && app.id
+        && app.systemApp !== true
+        && app.id !== 'com.lgtv.tvlauncher')
       .map((app) => ({
         id: app.id,
         name: typeof app.title === 'string' && app.title.trim() ? app.title.trim() : app.id,
