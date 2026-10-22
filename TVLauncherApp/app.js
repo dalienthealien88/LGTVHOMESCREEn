@@ -80,6 +80,19 @@ function saveApps() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(apps));
 }
 
+function installedAppIconUrl(app) {
+  if (typeof app.folderPath !== 'string' || !app.folderPath.startsWith('/')) return '';
+
+  const iconName = [app.extraLargeIcon, app.largeIcon, app.mediumLargeIcon, app.icon]
+    .find((name) => typeof name === 'string' && name.trim());
+  if (!iconName || iconName.startsWith('/') || iconName.split('/').includes('..')) return '';
+
+  const path = [...app.folderPath.split('/'), ...iconName.split('/')]
+    .map((part) => encodeURIComponent(part))
+    .join('/');
+  return `file://${path}`;
+}
+
 function renderApps() {
   appGrid.innerHTML = '';
 
@@ -91,10 +104,28 @@ function renderApps() {
     tile.setAttribute('aria-label', app.name);
     tile.dataset.index = String(index);
     tile.innerHTML = `
-      <div class="app-icon">${app.icon || '◉'}</div>
+      <div class="app-icon"></div>
       <div class="app-name">${escapeHtml(app.name)}</div>
       <div class="app-type">${app.type === 'app' ? 'App' : app.type === 'internal' ? 'Launcher' : 'Link'}</div>
     `;
+    const iconContainer = tile.querySelector('.app-icon');
+    const fallbackIcon = document.createElement('span');
+    fallbackIcon.textContent = app.icon || '◉';
+    iconContainer.appendChild(fallbackIcon);
+
+    if (app.iconUrl) {
+      const iconImage = document.createElement('img');
+      iconImage.className = 'app-logo';
+      iconImage.alt = '';
+      iconImage.src = app.iconUrl;
+      iconImage.addEventListener('load', () => {
+        fallbackIcon.hidden = true;
+      });
+      iconImage.addEventListener('error', () => {
+        iconImage.remove();
+      });
+      iconContainer.appendChild(iconImage);
+    }
 
     if (index === selectedIndex) {
       tile.classList.add('active');
@@ -184,6 +215,7 @@ function addInstalledApp() {
     id: `webos-${selectedApp.id}`,
     name: selectedApp.name,
     icon: selectedApp.icon,
+    iconUrl: selectedApp.iconUrl,
     target: selectedApp.id,
     type: 'app'
   });
@@ -208,6 +240,7 @@ function syncInstalledAppsToHomepage() {
       id: `webos-${app.id}`,
       name: app.name,
       icon: app.icon,
+      iconUrl: app.iconUrl,
       target: app.id,
       type: 'app'
     }));
@@ -233,7 +266,8 @@ function loadInstalledApps() {
       .map((app) => ({
         id: app.id,
         name: typeof app.title === 'string' && app.title.trim() ? app.title.trim() : app.id,
-        icon: typeof app.title === 'string' && app.title.trim() ? app.title.trim().slice(0, 2) : '◉'
+        icon: typeof app.title === 'string' && app.title.trim() ? app.title.trim().slice(0, 2) : '◉',
+        iconUrl: installedAppIconUrl(app)
       }))
       .sort((first, second) => first.name.localeCompare(second.name));
     installedAppPicker.replaceChildren();
