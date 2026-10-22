@@ -59,7 +59,8 @@
     const message = document.getElementById('message');
     const frame = document.getElementById('page-frame');
     let currentUrl = null;
-    address.value = localStorage.getItem('urlviewer.defaultAddress') || localStorage.getItem('urlviewer.lastAddress') || '';
+    const defaultAddress = localStorage.getItem('urlviewer.defaultAddress');
+    address.value = defaultAddress || localStorage.getItem('urlviewer.lastAddress') || '';
 
     function getValidAddress() {
       let value = address.value.trim();
@@ -135,6 +136,15 @@
       rememberUrl(url);
       window.location.assign(url.href);
     });
+
+    if (defaultAddress) {
+      try {
+        window.location.replace(getValidAddress().href);
+      } catch (error) {
+        message.textContent = error.message;
+        address.focus();
+      }
+    }
   </script>
 </body>
 </html>
