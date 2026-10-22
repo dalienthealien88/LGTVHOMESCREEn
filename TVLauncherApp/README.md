@@ -6,19 +6,17 @@ A separate, custom TV-friendly launcher built as a new app alongside the existin
 
 - full-screen app grid
 - a horizontally scrolling app carousel with D-pad navigation and centered focus
-- automatically fills the homepage with installed non-system apps
+- automatically adds newly discovered apps to the homepage, including the built-in web browser
 - uses each installed app's logo from its on-TV package files
 - weather + clock widgets
-- launcher settings tile in the app grid
-- add/remove apps with local persistence
-- select non-system apps from the TV's webOS Application Manager app list through the Homebrew Channel service, with direct API fallbacks
-- add custom URLs or webOS app IDs
+- bottom-corner settings button with per-app visibility controls
+- a shortcut to return to the stock LG Home screen
+- discovers apps through the Homebrew Channel service
 - remote-friendly D-pad navigation
-- D-pad navigation through the app carousel and launcher settings
-- TV remote Back button closes launcher settings and returns focus to the selected app
-- URL launching and webOS app-ID launching through the application manager service
+- TV remote Back button closes settings and returns focus to the selected app
+- launches apps through the webOS Application Manager
 
-Installed-app discovery and logo loading use the Homebrew Channel service and require Homebrew root to be enabled. The homepage and picker exclude system apps and the launcher itself; upgrading removes the previous demo URL shortcuts and fills the homepage with detected apps and their on-TV logos. Logos are read through the Homebrew service because the TV app cannot load files directly from other apps' package folders. Removing an installed app hides it from the homepage until it is added again in settings. If an app logo is unavailable, the launcher shows its text icon instead. Adding an app by ID remains available without discovery.
+Installed-app discovery and logo loading use the Homebrew Channel service and require Homebrew root to be enabled. The homepage excludes Bazaar, URL Viewer, Homebrew Channel, LG Input Hook, and TV Launcher itself; the built-in web browser is included despite being a system app. Newly discovered supported apps are added automatically. Weather is fixed to the Isle of Man. Logos are read through Homebrew because the launcher cannot load files directly from other apps' package folders. Hide or restore apps individually in settings.
 
 ## Files
 

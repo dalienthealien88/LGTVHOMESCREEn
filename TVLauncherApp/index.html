@@ -9,31 +9,28 @@
   <body>
     <div class="app-shell">
       <header class="topbar">
-        <div class="clock-panel panel">
+        <div class="clock-panel">
           <div id="dateText" class="date-label">Loading date...</div>
           <div id="timeText" class="time-value">--:--</div>
         </div>
 
-        <div class="weather-panel panel" aria-live="polite">
-          <div id="weatherIcon" class="weather-icon" aria-hidden="true">☀️</div>
-          <div class="weather-copy">
-            <div id="weatherLocation" class="weather-location">Locating...</div>
+        <div class="weather-panel" aria-live="polite">
+          <div id="weatherLocation" class="weather-location">Isle of Man</div>
+          <div class="weather-reading">
+            <div id="weatherIcon" class="weather-icon" aria-hidden="true">☀️</div>
             <div id="weatherTemp" class="weather-temp">--°</div>
           </div>
         </div>
       </header>
 
       <main class="content">
-        <div class="status-row">
-          <div class="status-pill"><span>TV</span><strong id="tvStatus">Ready</strong></div>
-          <div class="status-pill"><span>Wi‑Fi</span><strong id="networkStatus">Checking...</strong></div>
-          <div class="status-pill"><span>Sun</span><strong id="sunStatus">--:--</strong></div>
-        </div>
-
         <section class="app-carousel" aria-labelledby="appsTitle">
           <div class="carousel-heading">
-            <h1 id="appsTitle">Your apps</h1>
-            <span>Use ← → to browse · Press OK to open</span>
+            <div>
+              <span class="eyebrow">YOUR ENTERTAINMENT</span>
+              <h1 id="appsTitle">Pick up where you left off</h1>
+            </div>
+            <span class="browse-hint">← → Browse <span class="hint-divider">·</span> OK Open</span>
           </div>
           <div id="launcherGrid" class="launcher-grid" aria-label="TV app carousel"></div>
         </section>
@@ -41,57 +38,34 @@
 
       <aside id="settingsPanel" class="settings-panel hidden" aria-label="TV Launcher settings">
         <div class="panel-header">
-          <h2>Launcher settings</h2>
-          <span class="back-hint">Press BACK to close</span>
+          <div>
+            <span class="eyebrow">PERSONALISE</span>
+            <h2>Home screen</h2>
+          </div>
+          <span class="back-hint">BACK to close</span>
           <button id="closeSettings" class="close-button" type="button" aria-label="Close settings">✕</button>
         </div>
 
-        <section class="installed-apps-section" aria-labelledby="installedAppsTitle">
-          <h3 id="installedAppsTitle">Apps on this TV</h3>
-          <label for="installedAppPicker">Choose an installed app to add</label>
-          <select id="installedAppPicker">
-            <option value="">Choose an app...</option>
-          </select>
-          <div id="installedAppStatus" class="settings-status" role="status" aria-live="polite">Finding installed apps...</div>
-          <button id="addInstalledApp" class="primary-button" type="button" disabled>Add selected app</button>
+        <section class="saved-apps-wrap" aria-labelledby="appsOnHomeTitle">
+          <div class="settings-copy">
+            <h3 id="appsOnHomeTitle">Apps on your home screen</h3>
+            <p>Choose which apps appear in your launcher.</p>
+            <div id="settingsStatus" class="settings-status" role="status" aria-live="polite">Finding apps on this TV…</div>
+          </div>
+          <div id="appList" class="saved-apps"></div>
         </section>
 
-        <form id="addAppForm" class="add-app-form">
-          <h3>Add a custom link</h3>
-          <label>
-            Name
-            <input id="appName" type="text" maxlength="24" placeholder="My website" required />
-          </label>
-
-          <label>
-            Icon
-            <input id="appIcon" type="text" maxlength="2" value="▶" placeholder="▶" />
-          </label>
-
-          <label>
-            URL or app ID
-            <input id="appTarget" type="text" required placeholder="https://example.com or com.app.id" />
-          </label>
-
-          <div class="radio-row">
-            <label class="radio-option">
-              <input type="radio" name="launchType" value="url" checked />
-              <span>URL</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="launchType" value="app" />
-              <span>App ID</span>
-            </label>
-          </div>
-
-          <button type="submit" class="primary-button">Add app</button>
-        </form>
-
-        <div class="saved-apps-wrap">
-          <h3>Saved apps</h3>
-          <div id="appList" class="saved-apps"></div>
-        </div>
+        <button id="returnHome" class="return-home-button" type="button">
+          <span aria-hidden="true">⌂</span>
+          <span>Return to LG Home</span>
+          <span class="button-arrow" aria-hidden="true">↗</span>
+        </button>
       </aside>
+
+      <button id="openSettings" class="settings-toggle" type="button" aria-label="Home screen settings">
+        <span aria-hidden="true">⚙</span>
+      </button>
+      <div id="launchStatus" class="launch-status" role="status" aria-live="polite"></div>
     </div>
 
     <script src="webOSTV.js"></script>

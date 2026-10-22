@@ -1,9 +1,9 @@
 {
   "id": "com.lgtv.tvlauncher",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "vendor": "LGTV Homebrew",
   "title": "TV Launcher",
-  "appDescription": "A custom TV launcher with an app carousel, weather, clock, and settings",
+  "appDescription": "A modern TV launcher with your apps, local weather, and quick home-screen controls",
   "type": "web",
   "main": "index.html",
   "icon": "icon.png",
