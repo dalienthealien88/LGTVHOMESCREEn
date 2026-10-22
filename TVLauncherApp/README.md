@@ -5,11 +5,12 @@ A separate, custom TV-friendly launcher built as a new app alongside the existin
 ## Includes
 
 - full-screen app grid
+- a curated Netflix picks carousel with generic, non-personalized title searches
 - weather + clock widgets
-- bottom-right settings drawer
+- launcher settings tile in the app grid
 - add/remove apps with local persistence
 - remote-friendly D-pad navigation
-- directional access to the bottom-right settings button
+- D-pad navigation between the app grid, Netflix picks, and launcher settings
 - app launch support for URLs and webOS app IDs
 
 ## Files
@@ -18,7 +19,7 @@ A separate, custom TV-friendly launcher built as a new app alongside the existin
 - `styles.css`
 - `app.js`
 - `appinfo.json`
-- `icon.svg`
+- `icon.png`
 
 ## Packaging
 

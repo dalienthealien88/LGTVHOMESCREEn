@@ -3,15 +3,26 @@ const DEFAULT_APPS = [
   { id: 'youtube', name: 'YouTube', icon: '▶', target: 'https://www.youtube.com/', type: 'url' },
   { id: 'netflix', name: 'Netflix', icon: 'N', target: 'https://www.netflix.com/', type: 'url' },
   { id: 'spotify', name: 'Spotify', icon: '♫', target: 'https://open.spotify.com/', type: 'url' },
-  { id: 'settings', name: 'Settings', icon: '⚙', target: 'com.webos.app.settings', type: 'app' },
+  { id: 'settings', name: 'TV Settings', icon: '⚙', target: 'com.webos.app.settings', type: 'app' },
   { id: 'browser', name: 'Browser', icon: '🌐', target: 'com.webos.app.browser', type: 'app' },
-  { id: 'music', name: 'Media', icon: '♪', target: 'com.webos.app.music', type: 'app' }
+  { id: 'music', name: 'Media', icon: '♪', target: 'com.webos.app.music', type: 'app' },
+  { id: 'launcher-settings', name: 'Launcher Settings', icon: '⚙', target: '', type: 'internal' }
+];
+const NETFLIX_PICKS = [
+  { title: 'Wednesday', genre: 'Mystery', color: '#594369' },
+  { title: 'Stranger Things', genre: 'Sci-fi', color: '#743a40' },
+  { title: 'Bridgerton', genre: 'Drama', color: '#6b4266' },
+  { title: 'The Night Agent', genre: 'Thriller', color: '#315064' },
+  { title: 'ONE PIECE', genre: 'Adventure', color: '#3e685e' },
+  { title: 'Black Mirror', genre: 'Sci-fi', color: '#34414d' },
+  { title: 'The Crown', genre: 'Drama', color: '#66543d' },
+  { title: 'Our Planet', genre: 'Documentary', color: '#337067' }
 ];
 
 const appGrid = document.getElementById('launcherGrid');
 const appList = document.getElementById('appList');
+const recommendationsList = document.getElementById('recommendationsList');
 const settingsPanel = document.getElementById('settingsPanel');
-const settingsToggle = document.getElementById('settingsToggle');
 const closeSettings = document.getElementById('closeSettings');
 const addAppForm = document.getElementById('addAppForm');
 const appNameInput = document.getElementById('appName');
@@ -28,7 +39,21 @@ const sunStatus = document.getElementById('sunStatus');
 
 let apps = loadApps();
 let selectedIndex = 0;
+let selectedRecommendationIndex = 0;
 let settingsOpen = false;
+
+function withLauncherSettings(savedApps) {
+  const migratedApps = savedApps.map((app) => (
+    app.id === 'settings' && app.name === 'Settings'
+      ? { ...app, name: 'TV Settings' }
+      : app
+  ));
+
+  if (!migratedApps.some((app) => app.id === 'launcher-settings')) {
+    migratedApps.push({ ...DEFAULT_APPS[DEFAULT_APPS.length - 1] });
+  }
+  return migratedApps;
+}
 
 function loadApps() {
   const saved = localStorage.getItem(STORAGE_KEY);
@@ -37,7 +62,7 @@ function loadApps() {
   try {
     const parsed = JSON.parse(saved);
     if (!Array.isArray(parsed) || !parsed.length) return DEFAULT_APPS.map((app) => ({ ...app }));
-    return parsed;
+    return withLauncherSettings(parsed);
   } catch (error) {
     return DEFAULT_APPS.map((app) => ({ ...app }));
   }
@@ -60,7 +85,7 @@ function renderApps() {
     tile.innerHTML = `
       <div class="app-icon">${app.icon || '◉'}</div>
       <div class="app-name">${escapeHtml(app.name)}</div>
-      <div class="app-type">${app.type === 'app' ? 'App' : 'Link'}</div>
+      <div class="app-type">${app.type === 'app' ? 'App' : app.type === 'internal' ? 'Launcher' : 'Link'}</div>
     `;
 
     if (index === selectedIndex) {
@@ -70,7 +95,7 @@ function renderApps() {
     tile.addEventListener('click', () => {
       selectedIndex = index;
       renderApps();
-      launchApp(apps[index]);
+      activateApp(apps[index]);
     });
     tile.addEventListener('focus', () => {
       selectedIndex = index;
@@ -83,6 +108,28 @@ function renderApps() {
   });
 
   renderSavedApps();
+}
+
+function renderRecommendations() {
+  recommendationsList.innerHTML = '';
+  NETFLIX_PICKS.forEach((pick, index) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'recommendation-card';
+    card.dataset.index = String(index);
+    card.style.setProperty('--poster-color', pick.color);
+    card.innerHTML = `
+      <span class="recommendation-rank">${index + 1}</span>
+      <span class="recommendation-title">${escapeHtml(pick.title)}</span>
+      <span class="recommendation-genre">${escapeHtml(pick.genre)}</span>
+    `;
+    card.setAttribute('aria-label', `${pick.title}, ${pick.genre}. Open Netflix search`);
+    card.addEventListener('focus', () => {
+      selectedRecommendationIndex = index;
+    });
+    card.addEventListener('click', () => openNetflixPick(index));
+    recommendationsList.appendChild(card);
+  });
 }
 
 function renderSavedApps() {
@@ -165,6 +212,24 @@ function launchApp(app) {
   tvStatus.textContent = `Opened: ${app.name}`;
 }
 
+function activateApp(app) {
+  if (app?.id === 'launcher-settings') {
+    openPanel();
+    return;
+  }
+  launchApp(app);
+}
+
+function openNetflixPick(index) {
+  const pick = NETFLIX_PICKS[index];
+  if (!pick) return;
+  launchApp({
+    name: `Netflix search: ${pick.title}`,
+    target: `https://www.netflix.com/search?q=${encodeURIComponent(pick.title)}`,
+    type: 'url'
+  });
+}
+
 function openPanel() {
   settingsOpen = true;
   settingsPanel.classList.remove('hidden');
@@ -192,7 +257,17 @@ function focusApp(index) {
 }
 
 function getGridColumnCount() {
-  return getComputedStyle(appGrid).gridTemplateColumns.trim().split(/\s+/).length;
+  const tiles = [...appGrid.querySelectorAll('.app-tile')];
+  if (!tiles.length) return 1;
+  const firstRowTop = tiles[0].getBoundingClientRect().top;
+  return tiles.filter((tile) => Math.abs(tile.getBoundingClientRect().top - firstRowTop) < 1).length;
+}
+
+function focusRecommendation(index) {
+  const cards = [...recommendationsList.querySelectorAll('.recommendation-card')];
+  if (!cards.length) return;
+  selectedRecommendationIndex = Math.max(0, Math.min(index, cards.length - 1));
+  cards[selectedRecommendationIndex].focus();
 }
 
 function updateClock() {
@@ -306,32 +381,39 @@ function handleKeyNavigation(event) {
 
   if (settingsOpen) return;
 
-  if (document.activeElement === settingsToggle) {
-    if (key === 'ArrowUp' || key === 'ArrowLeft') {
-      focusApp(selectedIndex);
+  const activeElement = document.activeElement;
+  if (activeElement.classList.contains('recommendation-card')) {
+    const currentIndex = Number(activeElement.dataset.index);
+    if (key === 'ArrowRight') {
+      focusRecommendation(currentIndex + 1);
+      event.preventDefault();
+    } else if (key === 'ArrowLeft') {
+      focusRecommendation(currentIndex - 1);
+      event.preventDefault();
+    } else if (key === 'ArrowUp') {
+      focusApp(Math.min(currentIndex, apps.length - 1));
+      event.preventDefault();
+    } else if (key === 'Enter' || key === ' ') {
+      openNetflixPick(currentIndex);
       event.preventDefault();
     }
     return;
   }
 
-  const currentIndex = document.activeElement.classList.contains('app-tile')
-    ? Number(document.activeElement.dataset.index)
+  const currentIndex = activeElement.classList.contains('app-tile')
+    ? Number(activeElement.dataset.index)
     : selectedIndex;
   const columns = getGridColumnCount();
 
   if (key === 'ArrowRight' || key === 'd') {
-    if (currentIndex >= apps.length - 1) {
-      settingsToggle.focus();
-    } else {
-      focusApp(currentIndex + 1);
-    }
+    focusApp(currentIndex + 1);
     event.preventDefault();
   } else if (key === 'ArrowLeft' || key === 'a') {
     focusApp(currentIndex - 1);
     event.preventDefault();
   } else if (key === 'ArrowDown' || key === 's') {
     if (currentIndex + columns >= apps.length) {
-      settingsToggle.focus();
+      focusRecommendation(Math.min(currentIndex, NETFLIX_PICKS.length - 1));
     } else {
       focusApp(currentIndex + columns);
     }
@@ -340,8 +422,8 @@ function handleKeyNavigation(event) {
     focusApp(currentIndex - columns);
     event.preventDefault();
   } else if (key === 'Enter' || key === ' ') {
-    if (document.activeElement.classList.contains('app-tile')) {
-      launchApp(apps[currentIndex]);
+    if (activeElement.classList.contains('app-tile')) {
+      activateApp(apps[currentIndex]);
       event.preventDefault();
     } else {
       focusGrid();
@@ -352,7 +434,6 @@ function handleKeyNavigation(event) {
   }
 }
 
-settingsToggle.addEventListener('click', () => settingsOpen ? closePanel() : openPanel());
 closeSettings.addEventListener('click', closePanel);
 addAppForm.addEventListener('submit', addApp);
 document.addEventListener('keydown', handleKeyNavigation);
@@ -372,5 +453,6 @@ updateClock();
 updateWeather();
 updateNetworkStatus();
 renderApps();
+renderRecommendations();
 setInterval(updateClock, 30000);
 setInterval(updateWeather, 900000);

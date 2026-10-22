@@ -33,7 +33,13 @@
         <section id="launcherGrid" class="launcher-grid" aria-label="TV app grid"></section>
       </main>
 
-      <button id="settingsToggle" class="settings-toggle" type="button">Settings</button>
+      <section class="recommendations" aria-labelledby="recommendationsTitle">
+        <div class="recommendations-heading">
+          <h2 id="recommendationsTitle">Netflix picks</h2>
+          <span>Curated picks · not personalized or live-updating · availability varies by region</span>
+        </div>
+        <div id="recommendationsList" class="recommendations-list" aria-label="Netflix title picks"></div>
+      </section>
 
       <aside id="settingsPanel" class="settings-panel hidden" aria-label="TV Launcher settings">
         <div class="panel-header">
