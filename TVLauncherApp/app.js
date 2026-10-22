@@ -1,7 +1,8 @@
 const STORAGE_KEY = 'tvlauncher.apps.v1';
+const NETFLIX_APP_ID = 'netflix';
 const DEFAULT_APPS = [
   { id: 'youtube', name: 'YouTube', icon: '▶', target: 'https://www.youtube.com/', type: 'url' },
-  { id: 'netflix', name: 'Netflix', icon: 'N', target: 'https://www.netflix.com/', type: 'url' },
+  { id: 'netflix', name: 'Netflix', icon: 'N', target: NETFLIX_APP_ID, type: 'app' },
   { id: 'spotify', name: 'Spotify', icon: '♫', target: 'https://open.spotify.com/', type: 'url' },
   { id: 'settings', name: 'TV Settings', icon: '⚙', target: 'com.webos.app.settings', type: 'app' },
   { id: 'browser', name: 'Browser', icon: '🌐', target: 'com.webos.app.browser', type: 'app' },
@@ -9,14 +10,14 @@ const DEFAULT_APPS = [
   { id: 'launcher-settings', name: 'Launcher Settings', icon: '⚙', target: '', type: 'internal' }
 ];
 const NETFLIX_PICKS = [
-  { title: 'Wednesday', genre: 'Mystery', color: '#594369' },
-  { title: 'Stranger Things', genre: 'Sci-fi', color: '#743a40' },
-  { title: 'Bridgerton', genre: 'Drama', color: '#6b4266' },
-  { title: 'The Night Agent', genre: 'Thriller', color: '#315064' },
-  { title: 'ONE PIECE', genre: 'Adventure', color: '#3e685e' },
-  { title: 'Black Mirror', genre: 'Sci-fi', color: '#34414d' },
-  { title: 'The Crown', genre: 'Drama', color: '#66543d' },
-  { title: 'Our Planet', genre: 'Documentary', color: '#337067' }
+  { title: 'Wednesday', netflixId: '81231974', genre: 'Mystery', color: '#594369' },
+  { title: 'Stranger Things', netflixId: '80057281', genre: 'Sci-fi', color: '#743a40' },
+  { title: 'Bridgerton', netflixId: '80232398', genre: 'Drama', color: '#6b4266' },
+  { title: 'The Night Agent', netflixId: '81450827', genre: 'Thriller', color: '#315064' },
+  { title: 'ONE PIECE', netflixId: '80217863', genre: 'Adventure', color: '#3e685e' },
+  { title: 'Black Mirror', netflixId: '70264888', genre: 'Sci-fi', color: '#34414d' },
+  { title: 'The Crown', netflixId: '80025678', genre: 'Drama', color: '#66543d' },
+  { title: 'Our Planet', netflixId: '80049832', genre: 'Documentary', color: '#337067' }
 ];
 
 const appGrid = document.getElementById('launcherGrid');
@@ -46,7 +47,9 @@ function withLauncherSettings(savedApps) {
   const migratedApps = savedApps.map((app) => (
     app.id === 'settings' && app.name === 'Settings'
       ? { ...app, name: 'TV Settings' }
-      : app
+      : app.id === 'netflix'
+        ? { ...app, target: NETFLIX_APP_ID, type: 'app' }
+        : app
   ));
 
   if (!migratedApps.some((app) => app.id === 'launcher-settings')) {
@@ -123,7 +126,7 @@ function renderRecommendations() {
       <span class="recommendation-title">${escapeHtml(pick.title)}</span>
       <span class="recommendation-genre">${escapeHtml(pick.genre)}</span>
     `;
-    card.setAttribute('aria-label', `${pick.title}, ${pick.genre}. Open Netflix search`);
+    card.setAttribute('aria-label', `${pick.title}, ${pick.genre}. Open this title in Netflix`);
     card.addEventListener('focus', () => {
       selectedRecommendationIndex = index;
     });
@@ -196,7 +199,10 @@ function launchApp(app) {
   if (app.type === 'app' && target) {
     try {
       if (window.PalmSystem) {
-        window.location.href = `luna://com.webos.applicationManager/launch?appId=${encodeURIComponent(target)}`;
+        const contentParam = app.contentId
+          ? `&contentId=${encodeURIComponent(app.contentId)}`
+          : '';
+        window.location.href = `luna://com.webos.applicationManager/launch?appId=${encodeURIComponent(target)}${contentParam}`;
         return;
       }
     } catch (error) {
@@ -224,9 +230,10 @@ function openNetflixPick(index) {
   const pick = NETFLIX_PICKS[index];
   if (!pick) return;
   launchApp({
-    name: `Netflix search: ${pick.title}`,
-    target: `https://www.netflix.com/search?q=${encodeURIComponent(pick.title)}`,
-    type: 'url'
+    name: `Netflix: ${pick.title}`,
+    target: NETFLIX_APP_ID,
+    contentId: `m=https://www.netflix.com/watch/${pick.netflixId}&source_type=4`,
+    type: 'app'
   });
 }
 

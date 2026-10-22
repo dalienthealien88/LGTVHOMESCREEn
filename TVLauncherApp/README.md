@@ -5,7 +5,7 @@ A separate, custom TV-friendly launcher built as a new app alongside the existin
 ## Includes
 
 - full-screen app grid
-- a curated Netflix picks carousel with generic, non-personalized title searches
+- a curated Netflix picks carousel with title deep links into the Netflix TV app
 - weather + clock widgets
 - launcher settings tile in the app grid
 - add/remove apps with local persistence
