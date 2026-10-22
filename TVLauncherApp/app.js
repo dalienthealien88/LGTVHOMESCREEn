@@ -9,20 +9,8 @@ const DEFAULT_APPS = [
   { id: 'music', name: 'Media', icon: '♪', target: 'com.webos.app.music', type: 'app' },
   { id: 'launcher-settings', name: 'Launcher Settings', icon: '⚙', target: '', type: 'internal' }
 ];
-const NETFLIX_PICKS = [
-  { title: 'Wednesday', netflixId: '81231974', genre: 'Mystery', color: '#594369' },
-  { title: 'Stranger Things', netflixId: '80057281', genre: 'Sci-fi', color: '#743a40' },
-  { title: 'Bridgerton', netflixId: '80232398', genre: 'Drama', color: '#6b4266' },
-  { title: 'The Night Agent', netflixId: '81450827', genre: 'Thriller', color: '#315064' },
-  { title: 'ONE PIECE', netflixId: '80217863', genre: 'Adventure', color: '#3e685e' },
-  { title: 'Black Mirror', netflixId: '70264888', genre: 'Sci-fi', color: '#34414d' },
-  { title: 'The Crown', netflixId: '80025678', genre: 'Drama', color: '#66543d' },
-  { title: 'Our Planet', netflixId: '80049832', genre: 'Documentary', color: '#337067' }
-];
-
 const appGrid = document.getElementById('launcherGrid');
 const appList = document.getElementById('appList');
-const recommendationsList = document.getElementById('recommendationsList');
 const settingsPanel = document.getElementById('settingsPanel');
 const closeSettings = document.getElementById('closeSettings');
 const addAppForm = document.getElementById('addAppForm');
@@ -40,7 +28,6 @@ const sunStatus = document.getElementById('sunStatus');
 
 let apps = loadApps();
 let selectedIndex = 0;
-let selectedRecommendationIndex = 0;
 let settingsOpen = false;
 
 function withLauncherSettings(savedApps) {
@@ -113,28 +100,6 @@ function renderApps() {
   renderSavedApps();
 }
 
-function renderRecommendations() {
-  recommendationsList.innerHTML = '';
-  NETFLIX_PICKS.forEach((pick, index) => {
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = 'recommendation-card';
-    card.dataset.index = String(index);
-    card.style.setProperty('--poster-color', pick.color);
-    card.innerHTML = `
-      <span class="recommendation-rank">${index + 1}</span>
-      <span class="recommendation-title">${escapeHtml(pick.title)}</span>
-      <span class="recommendation-genre">${escapeHtml(pick.genre)}</span>
-    `;
-    card.setAttribute('aria-label', `${pick.title}, ${pick.genre}. Open this title in Netflix`);
-    card.addEventListener('focus', () => {
-      selectedRecommendationIndex = index;
-    });
-    card.addEventListener('click', () => openNetflixPick(index));
-    recommendationsList.appendChild(card);
-  });
-}
-
 function renderSavedApps() {
   appList.innerHTML = '';
 
@@ -199,10 +164,7 @@ function launchApp(app) {
   if (app.type === 'app' && target) {
     try {
       if (window.PalmSystem) {
-        const contentParam = app.contentId
-          ? `&contentId=${encodeURIComponent(app.contentId)}`
-          : '';
-        window.location.href = `luna://com.webos.applicationManager/launch?appId=${encodeURIComponent(target)}${contentParam}`;
+        window.location.href = `luna://com.webos.applicationManager/launch?appId=${encodeURIComponent(target)}`;
         return;
       }
     } catch (error) {
@@ -226,17 +188,6 @@ function activateApp(app) {
   launchApp(app);
 }
 
-function openNetflixPick(index) {
-  const pick = NETFLIX_PICKS[index];
-  if (!pick) return;
-  launchApp({
-    name: `Netflix: ${pick.title}`,
-    target: NETFLIX_APP_ID,
-    contentId: `m=https://www.netflix.com/watch/${pick.netflixId}&source_type=4`,
-    type: 'app'
-  });
-}
-
 function openPanel() {
   settingsOpen = true;
   settingsPanel.classList.remove('hidden');
@@ -250,31 +201,22 @@ function closePanel() {
 }
 
 function focusGrid() {
-  const tiles = [...document.querySelectorAll('.app-tile')];
-  const target = tiles[selectedIndex] || tiles[0];
-  if (target) target.focus();
+  focusApp(selectedIndex);
 }
 
 function focusApp(index) {
   selectedIndex = Math.max(0, Math.min(index, apps.length - 1));
-  document.querySelectorAll('.app-tile').forEach((tile, tileIndex) => {
+  const tiles = [...appGrid.querySelectorAll('.app-tile')];
+  tiles.forEach((tile, tileIndex) => {
     tile.classList.toggle('active', tileIndex === selectedIndex);
   });
-  focusGrid();
-}
-
-function getGridColumnCount() {
-  const tiles = [...appGrid.querySelectorAll('.app-tile')];
-  if (!tiles.length) return 1;
-  const firstRowTop = tiles[0].getBoundingClientRect().top;
-  return tiles.filter((tile) => Math.abs(tile.getBoundingClientRect().top - firstRowTop) < 1).length;
-}
-
-function focusRecommendation(index) {
-  const cards = [...recommendationsList.querySelectorAll('.recommendation-card')];
-  if (!cards.length) return;
-  selectedRecommendationIndex = Math.max(0, Math.min(index, cards.length - 1));
-  cards[selectedRecommendationIndex].focus();
+  const target = tiles[selectedIndex];
+  if (target) {
+    target.focus();
+    const gridBounds = appGrid.getBoundingClientRect();
+    const tileBounds = target.getBoundingClientRect();
+    appGrid.scrollLeft += tileBounds.left - gridBounds.left - (gridBounds.width - tileBounds.width) / 2;
+  }
 }
 
 function updateClock() {
@@ -389,44 +331,15 @@ function handleKeyNavigation(event) {
   if (settingsOpen) return;
 
   const activeElement = document.activeElement;
-  if (activeElement.classList.contains('recommendation-card')) {
-    const currentIndex = Number(activeElement.dataset.index);
-    if (key === 'ArrowRight') {
-      focusRecommendation(currentIndex + 1);
-      event.preventDefault();
-    } else if (key === 'ArrowLeft') {
-      focusRecommendation(currentIndex - 1);
-      event.preventDefault();
-    } else if (key === 'ArrowUp') {
-      focusApp(Math.min(currentIndex, apps.length - 1));
-      event.preventDefault();
-    } else if (key === 'Enter' || key === ' ') {
-      openNetflixPick(currentIndex);
-      event.preventDefault();
-    }
-    return;
-  }
-
   const currentIndex = activeElement.classList.contains('app-tile')
     ? Number(activeElement.dataset.index)
     : selectedIndex;
-  const columns = getGridColumnCount();
 
   if (key === 'ArrowRight' || key === 'd') {
     focusApp(currentIndex + 1);
     event.preventDefault();
   } else if (key === 'ArrowLeft' || key === 'a') {
     focusApp(currentIndex - 1);
-    event.preventDefault();
-  } else if (key === 'ArrowDown' || key === 's') {
-    if (currentIndex + columns >= apps.length) {
-      focusRecommendation(Math.min(currentIndex, NETFLIX_PICKS.length - 1));
-    } else {
-      focusApp(currentIndex + columns);
-    }
-    event.preventDefault();
-  } else if (key === 'ArrowUp' || key === 'w') {
-    focusApp(currentIndex - columns);
     event.preventDefault();
   } else if (key === 'Enter' || key === ' ') {
     if (activeElement.classList.contains('app-tile')) {
@@ -460,6 +373,5 @@ updateClock();
 updateWeather();
 updateNetworkStatus();
 renderApps();
-renderRecommendations();
 setInterval(updateClock, 30000);
 setInterval(updateWeather, 900000);
