@@ -1,7 +1,9 @@
 const STORAGE_KEY = 'tvlauncher.apps.v1';
 const NETFLIX_APP_ID = 'netflix';
 const APP_MANAGER_URI = 'luna://com.webos.applicationManager';
-const APP_MANAGER_LIST_APPS_URI = `${APP_MANAGER_URI}/listApps`;
+const HOMEBREW_SERVICE_URI = 'luna://org.webosbrew.hbchannel.service';
+const APP_MANAGER_LIST_APPS_COMMAND = 'luna-send-pub -n 1 luna://com.webos.applicationManager/dev/listApps {}';
+const APP_MANAGER_LIST_APPS_METHODS = ['dev/listApps', 'listApps'];
 const DEFAULT_APPS = [
   { id: 'youtube', name: 'YouTube', icon: '▶', target: 'https://www.youtube.com/', type: 'url' },
   { id: 'netflix', name: 'Netflix', icon: 'N', target: NETFLIX_APP_ID, type: 'app' },
@@ -179,13 +181,8 @@ function loadInstalledApps() {
   addInstalledAppButton.disabled = true;
   installedAppStatus.textContent = 'Finding installed apps...';
 
-  const handleSuccess = (response) => {
-    if (response?.returnValue === false || !Array.isArray(response?.apps)) {
-      handleFailure(response || new Error('Unexpected app list response.'));
-      return;
-    }
-
-    installedApps = response.apps
+  const setInstalledApps = (availableApps) => {
+    installedApps = availableApps
       .filter((app) => app && typeof app.id === 'string' && app.id && app.id !== 'com.lgtv.tvlauncher')
       .map((app) => ({
         id: app.id,
@@ -193,12 +190,10 @@ function loadInstalledApps() {
         icon: typeof app.title === 'string' && app.title.trim() ? app.title.trim().slice(0, 2) : '◉'
       }))
       .sort((first, second) => first.name.localeCompare(second.name));
-
     installedAppPicker.replaceChildren();
     if (!installedApps.length) {
       installedAppPicker.add(new Option('No installed apps found', ''));
-      installedAppStatus.textContent = 'The TV did not return any installed apps.';
-      return;
+      return false;
     }
 
     installedAppPicker.add(new Option('Choose an app...', ''));
@@ -206,46 +201,123 @@ function loadInstalledApps() {
       installedAppPicker.add(new Option(`${app.name} (${app.id})`, app.id));
     });
     installedAppStatus.textContent = `${installedApps.length} installed apps found.`;
+    return true;
   };
 
-  const handleFailure = (error) => {
-    console.warn('Unable to list installed webOS apps', error);
-    installedAppPicker.replaceChildren(new Option('Installed app list unavailable', ''));
-    installedAppStatus.textContent = 'Could not read the TV app list. You can still add an app ID below.';
+  const formatError = (error) => {
+    if (typeof error === 'string') return error;
+    if (error?.errorText) return error.errorText;
+    if (error?.message) return error.message;
+    if (error?.errorCode !== undefined) return `error ${error.errorCode}`;
+    return 'app list unavailable';
   };
 
-  if (window.webOS?.service?.request) {
+  const failures = [];
+
+  const handleAppListResponse = (response) => {
+    if (response?.returnValue === false || !Array.isArray(response?.apps)) {
+      failures.push(`app manager: ${formatError(response || 'unexpected app list response')}`);
+      return false;
+    }
+    return setInstalledApps(response.apps);
+  };
+
+  const tryMethod = (index) => {
+    if (index >= APP_MANAGER_LIST_APPS_METHODS.length) {
+      console.warn('Unable to list installed webOS apps', failures);
+      installedAppPicker.replaceChildren(new Option('Installed app list unavailable', ''));
+      installedAppStatus.textContent = failures.length
+        ? `Could not read the TV app list (${failures.join('; ')}). You can still add an app ID below.`
+        : 'The TV returned no installed apps. You can still add an app ID below.';
+      return;
+    }
+
+    const method = APP_MANAGER_LIST_APPS_METHODS[index];
+    const handleFailure = (error) => {
+      failures.push(`${method}: ${formatError(error)}`);
+      tryMethod(index + 1);
+    };
+    const handleSuccess = (response) => {
+      if (!handleAppListResponse(response)) {
+        failures.push(`${method}: returned no usable apps`);
+        tryMethod(index + 1);
+      }
+    };
+
+    if (window.webOS?.service?.request) {
+      try {
+        window.webOS.service.request(APP_MANAGER_URI, {
+          method,
+          parameters: {},
+          onSuccess: handleSuccess,
+          onFailure: handleFailure
+        });
+      } catch (error) {
+        handleFailure(error);
+      }
+      return;
+    }
+
+    if (typeof window.PalmServiceBridge === 'function') {
+      try {
+        const bridge = new window.PalmServiceBridge();
+        bridge.onservicecallback = (message) => {
+          try {
+            handleSuccess(JSON.parse(message));
+          } catch (error) {
+            handleFailure(error);
+          }
+        };
+        bridge.call(`${APP_MANAGER_URI}/${method}`, JSON.stringify({}));
+      } catch (error) {
+        handleFailure(error);
+      }
+      return;
+    }
+
+    handleFailure(new Error('webOS Luna service bridge is unavailable.'));
+  };
+
+  const tryHomebrewService = () => {
+    if (!window.webOS?.service?.request) {
+      tryMethod(0);
+      return;
+    }
+
     try {
-      window.webOS.service.request(APP_MANAGER_URI, {
-        method: 'listApps',
-        parameters: {},
-        onSuccess: handleSuccess,
-        onFailure: handleFailure
+      window.webOS.service.request(HOMEBREW_SERVICE_URI, {
+        method: 'exec',
+        parameters: { command: APP_MANAGER_LIST_APPS_COMMAND },
+        onSuccess: (response) => {
+          if (response?.returnValue === false || typeof response?.stdoutString !== 'string') {
+            failures.push(`Homebrew service: ${formatError(response || 'no command output')}`);
+            tryMethod(0);
+            return;
+          }
+
+          try {
+            const appList = JSON.parse(response.stdoutString);
+            if (!handleAppListResponse(appList)) {
+              failures.push('Homebrew service: returned no usable apps');
+              tryMethod(0);
+            }
+          } catch (error) {
+            failures.push(`Homebrew service: ${formatError(error)}`);
+            tryMethod(0);
+          }
+        },
+        onFailure: (error) => {
+          failures.push(`Homebrew service: ${formatError(error)}`);
+          tryMethod(0);
+        }
       });
     } catch (error) {
-      handleFailure(error);
+      failures.push(`Homebrew service: ${formatError(error)}`);
+      tryMethod(0);
     }
-    return;
-  }
+  };
 
-  if (typeof window.PalmServiceBridge === 'function') {
-    try {
-      const bridge = new window.PalmServiceBridge();
-      bridge.onservicecallback = (message) => {
-        try {
-          handleSuccess(JSON.parse(message));
-        } catch (error) {
-          handleFailure(error);
-        }
-      };
-      bridge.call(APP_MANAGER_LIST_APPS_URI, JSON.stringify({}));
-    } catch (error) {
-      handleFailure(error);
-    }
-    return;
-  }
-
-  handleFailure(new Error('webOS Luna service bridge is unavailable.'));
+  tryHomebrewService();
 }
 
 function removeApp(index) {
