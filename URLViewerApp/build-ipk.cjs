@@ -9,7 +9,7 @@ fs.rmSync(tmp, { recursive: true, force: true });
 fs.mkdirSync(path.join(tmp, 'control'), { recursive: true });
 const app = path.join(tmp, 'usr', 'palm', 'applications', meta.id);
 fs.mkdirSync(app, { recursive: true });
-for (const name of ['appinfo.json', 'index.html', 'urlviewer-icon-1.0.4.png']) fs.copyFileSync(path.join(base, name), path.join(app, name));
+for (const name of ['appinfo.json', 'index.html', 'urlviewer-icon-1.0.8.png']) fs.copyFileSync(path.join(base, name), path.join(app, name));
 fs.writeFileSync(path.join(tmp, 'control', 'control'), [
   `Package: ${meta.id}`, `Version: ${meta.version}`, 'Architecture: all',
   `Description: ${meta.appDescription}`, 'Maintainer: LGTV Homebrew',

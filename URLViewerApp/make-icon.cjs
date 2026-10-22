@@ -33,6 +33,51 @@ for (let y = 0; y < drawSize; y++) {
   }
 }
 
+const glyphs = {
+  F: ['11111','10000','11110','10000','10000','10000','10000'],
+  l: ['11000','01000','01000','01000','01000','01000','11100'],
+  i: ['00100','00000','01100','00100','00100','00100','01110'],
+  x: ['00000','10001','01010','00100','01010','10001','00000'],
+  T: ['11111','00100','00100','00100','00100','00100','00100'],
+  o: ['00000','01110','10001','10001','10001','10001','01110'],
+  r: ['00000','10110','11001','10000','10000','10000','10000']
+};
+const label = 'FlixTor';
+const scale = 2;
+const glyphWidth = 5;
+const gap = 1;
+const labelWidth = (label.length * glyphWidth + (label.length - 1) * gap) * scale;
+const labelHeight = 7 * scale;
+const labelX = Math.floor((width - labelWidth) / 2);
+const labelY = Math.floor((height - labelHeight) / 2);
+function paintPixel(x, y, color) {
+  if (x < 0 || y < 0 || x >= width || y >= height) return;
+  const index = (y * width + x) * 4;
+  rgba[index] = color[0]; rgba[index + 1] = color[1]; rgba[index + 2] = color[2]; rgba[index + 3] = 255;
+}
+let cursorX = labelX;
+const textPixels = [];
+for (const letter of label) {
+  const bitmap = glyphs[letter];
+  for (let gy = 0; gy < bitmap.length; gy++) {
+    for (let gx = 0; gx < bitmap[gy].length; gx++) {
+      if (bitmap[gy][gx] !== '1') continue;
+      textPixels.push([cursorX + gx * scale, labelY + gy * scale]);
+    }
+  }
+  cursorX += (glyphWidth + gap) * scale;
+}
+for (const [px, py] of textPixels) {
+  for (let oy = -1; oy <= scale; oy++) {
+    for (let ox = -1; ox <= scale; ox++) paintPixel(px + ox, py + oy, [0, 0, 0]);
+  }
+}
+for (const [px, py] of textPixels) {
+  for (let oy = 0; oy < scale; oy++) {
+    for (let ox = 0; ox < scale; ox++) paintPixel(px + ox, py + oy, [255, 255, 255]);
+  }
+}
+
 const rows = [];
 for (let y = 0; y < height; y++) {
   const row = Buffer.alloc(1 + width * 4);
@@ -61,4 +106,4 @@ const png = Buffer.concat([
   chunk('IDAT', zlib.deflateSync(Buffer.concat(rows))),
   chunk('IEND', Buffer.alloc(0))
 ]);
-fs.writeFileSync(path.join(__dirname, 'urlviewer-icon-1.0.4.png'), png);
+fs.writeFileSync(path.join(__dirname, 'urlviewer-icon-1.0.8.png'), png);
