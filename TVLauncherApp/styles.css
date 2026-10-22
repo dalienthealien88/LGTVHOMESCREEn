@@ -256,6 +256,8 @@ button:focus-visible {
   right: 22px;
   bottom: 70px;
   width: min(420px, calc(100vw - 42px));
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
   padding: 16px 16px 12px;
   border-radius: 22px;
   background: rgba(8, 15, 22, 0.94);
@@ -283,6 +285,12 @@ button:focus-visible {
   font-size: 1.2rem;
 }
 
+.back-hint {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
 .close-button {
   width: 32px;
   height: 32px;
@@ -291,6 +299,33 @@ button:focus-visible {
   background: transparent;
   color: var(--text);
   cursor: pointer;
+}
+
+.installed-apps-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.installed-apps-section h3,
+.add-app-form h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.installed-apps-section label,
+.add-app-form label {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.settings-status {
+  min-height: 1.2em;
+  color: var(--muted);
+  font-size: 0.78rem;
 }
 
 .add-app-form {
@@ -310,12 +345,19 @@ button:focus-visible {
   color: var(--muted);
 }
 
-.add-app-form input {
+.add-app-form input,
+.installed-apps-section select {
+  width: 100%;
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 10px;
   background: rgba(255,255,255,0.04);
   color: var(--text);
   padding: 10px 12px;
+}
+
+.installed-apps-section select option {
+  color: #14202b;
+  background: #edf8ff;
 }
 
 .radio-row {
@@ -343,6 +385,11 @@ button:focus-visible {
   color: #062032;
   font-weight: 700;
   cursor: pointer;
+}
+
+.primary-button:disabled {
+  cursor: default;
+  opacity: 0.5;
 }
 
 .saved-apps-wrap h3 {

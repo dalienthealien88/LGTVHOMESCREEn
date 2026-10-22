@@ -9,8 +9,11 @@ A separate, custom TV-friendly launcher built as a new app alongside the existin
 - weather + clock widgets
 - launcher settings tile in the app grid
 - add/remove apps with local persistence
+- select installed webOS apps from the TV's app list
+- add custom URLs or webOS app IDs
 - remote-friendly D-pad navigation
 - D-pad navigation through the app carousel and launcher settings
+- TV remote Back button closes launcher settings and returns focus to the selected app
 - app launch support for URLs and webOS app IDs
 
 ## Files
