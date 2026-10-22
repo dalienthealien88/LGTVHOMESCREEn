@@ -21,4 +21,4 @@ A separate, custom TV-friendly launcher built as a new app alongside the existin
 
 ## Packaging
 
-Run `node TVLauncherApp/build-ipk.cjs` from the repository root to create `TVLauncher.ipk`. The package is a standalone webOS app, not a replacement for the stock launcher. Install it using your supported webOS homebrew or developer installation method, then assign it through a custom remote button mapping.
+Run `node TVLauncherApp/build-ipk.cjs` from the repository root to create `TVLauncher.ipk` and update its SHA-256 hash in `tvlauncher.manifest.json`. The package is a standalone webOS app, not a replacement for the stock launcher. Install it using your supported webOS homebrew or developer installation method, then assign it through a custom remote button mapping.
