@@ -14,8 +14,8 @@
           <div id="timeText" class="time-text">--:--</div>
         </div>
 
-        <div class="widget weather-widget">
-          <div id="weatherIcon" class="weather-icon">☀️</div>
+        <div class="widget weather-widget" aria-live="polite">
+          <div id="weatherIcon" class="weather-icon" aria-hidden="true">☀️</div>
           <div class="weather-meta">
             <div id="weatherLocation" class="weather-location">Locating...</div>
             <div id="weatherTemp" class="weather-temp">--°</div>
@@ -24,7 +24,7 @@
       </div>
 
       <main class="content">
-        <section class="status-strip">
+        <section class="status-strip" aria-label="Home details">
           <div class="status-item">
             <span class="status-label">TV</span>
             <span id="tvStatus">Ready</span>

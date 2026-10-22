@@ -1,0 +1,12 @@
+{
+  "id": "com.homeframe.launcher",
+  "version": "1.0.0",
+  "title": "Homeframe",
+  "type": "web",
+  "main": "index.html",
+  "icon": "icon.svg",
+  "largeIcon": "icon.svg",
+  "splashBackground": "#07131d",
+  "allowAudioPlayback": true,
+  "disableBackHistoryAPI": false
+}
