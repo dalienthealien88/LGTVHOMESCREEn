@@ -1,7 +1,7 @@
 const STORAGE_KEY = 'tvlauncher.apps.v1';
 const NETFLIX_APP_ID = 'netflix';
 const APP_MANAGER_URI = 'luna://com.webos.applicationManager';
-const APP_MANAGER_LIST_APPS_URI = `${APP_MANAGER_URI}/listApps`;
+const APP_MANAGER_LIST_LAUNCH_POINTS_URI = `${APP_MANAGER_URI}/listLaunchPoints`;
 const DEFAULT_APPS = [
   { id: 'youtube', name: 'YouTube', icon: '▶', target: 'https://www.youtube.com/', type: 'url' },
   { id: 'netflix', name: 'Netflix', icon: 'N', target: NETFLIX_APP_ID, type: 'app' },
@@ -180,12 +180,14 @@ function loadInstalledApps() {
   installedAppStatus.textContent = 'Finding installed apps...';
 
   const handleSuccess = (response) => {
-    if (response?.returnValue === false || !Array.isArray(response?.apps)) {
+    const availableApps = Array.isArray(response?.launchPoints)
+      ? response.launchPoints
+      : response?.apps;
+    if (response?.returnValue === false || !Array.isArray(availableApps)) {
       handleFailure(response || new Error('Unexpected app list response.'));
       return;
     }
 
-    const availableApps = response.apps;
     installedApps = availableApps
       .filter((app) => app && typeof app.id === 'string' && app.id && app.id !== 'com.lgtv.tvlauncher')
       .map((app) => ({
@@ -218,7 +220,7 @@ function loadInstalledApps() {
   if (window.webOS?.service?.request) {
     try {
       window.webOS.service.request(APP_MANAGER_URI, {
-        method: 'listApps',
+        method: 'listLaunchPoints',
         parameters: {},
         onSuccess: handleSuccess,
         onFailure: handleFailure
@@ -239,7 +241,7 @@ function loadInstalledApps() {
           handleFailure(error);
         }
       };
-      bridge.call(APP_MANAGER_LIST_APPS_URI, JSON.stringify({}));
+      bridge.call(APP_MANAGER_LIST_LAUNCH_POINTS_URI, JSON.stringify({}));
     } catch (error) {
       handleFailure(error);
     }
@@ -489,8 +491,5 @@ updateClock();
 updateWeather();
 updateNetworkStatus();
 renderApps();
-if (window.webOS?.service?.request || typeof window.PalmServiceBridge === 'function') {
-  loadInstalledApps();
-}
 setInterval(updateClock, 30000);
 setInterval(updateWeather, 900000);
