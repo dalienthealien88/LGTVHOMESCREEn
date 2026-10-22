@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
+const cp = require('child_process');
 
 const width = 128;
 const height = 128;
@@ -33,51 +34,6 @@ for (let y = 0; y < drawSize; y++) {
   }
 }
 
-const glyphs = {
-  F: ['111','100','110','100','100','100','100'],
-  l: ['100','100','100','100','100','100','111'],
-  i: ['010','000','110','010','010','010','111'],
-  x: ['101','101','010','010','010','101','101'],
-  T: ['111','010','010','010','010','010','010'],
-  o: ['000','111','101','101','101','101','111'],
-  r: ['000','110','101','100','100','100','100']
-};
-const label = 'FlixTor';
-const scale = 4;
-const glyphWidth = 3;
-const gap = 1;
-const labelWidth = (label.length * glyphWidth + (label.length - 1) * gap) * scale;
-const labelHeight = 7 * scale;
-const labelX = Math.floor((width - labelWidth) / 2);
-const labelY = Math.floor((height - labelHeight) / 2);
-function paintPixel(x, y, color) {
-  if (x < 0 || y < 0 || x >= width || y >= height) return;
-  const index = (y * width + x) * 4;
-  rgba[index] = color[0]; rgba[index + 1] = color[1]; rgba[index + 2] = color[2]; rgba[index + 3] = 255;
-}
-let cursorX = labelX;
-const textPixels = [];
-for (const letter of label) {
-  const bitmap = glyphs[letter];
-  for (let gy = 0; gy < bitmap.length; gy++) {
-    for (let gx = 0; gx < bitmap[gy].length; gx++) {
-      if (bitmap[gy][gx] !== '1') continue;
-      textPixels.push([cursorX + gx * scale, labelY + gy * scale]);
-    }
-  }
-  cursorX += (glyphWidth + gap) * scale;
-}
-for (const [px, py] of textPixels) {
-  for (let oy = -1; oy <= scale; oy++) {
-    for (let ox = -1; ox <= scale; ox++) paintPixel(px + ox, py + oy, [0, 0, 0]);
-  }
-}
-for (const [px, py] of textPixels) {
-  for (let oy = 0; oy < scale; oy++) {
-    for (let ox = 0; ox < scale; ox++) paintPixel(px + ox, py + oy, [255, 255, 255]);
-  }
-}
-
 const rows = [];
 for (let y = 0; y < height; y++) {
   const row = Buffer.alloc(1 + width * 4);
@@ -106,4 +62,12 @@ const png = Buffer.concat([
   chunk('IDAT', zlib.deflateSync(Buffer.concat(rows))),
   chunk('IEND', Buffer.alloc(0))
 ]);
-fs.writeFileSync(path.join(__dirname, 'urlviewer-icon-1.0.9.png'), png);
+const baseIconPath = path.join(__dirname, '.icon-base.png');
+fs.writeFileSync(baseIconPath, png);
+cp.execFileSync('powershell.exe', [
+  '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File',
+  path.join(__dirname, 'make-icon-title.ps1'),
+  baseIconPath,
+  path.join(__dirname, 'urlviewer-icon-1.0.10.png')
+], { stdio: 'inherit' });
+fs.unlinkSync(baseIconPath);
