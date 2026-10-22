@@ -13,6 +13,8 @@ const appFiles = new Set([
   meta.main,
   meta.icon,
   meta.largeIcon,
+  'webOSTV.js',
+  'WEBOSTV-LICENSE.txt',
   'app.js',
   'styles.css'
 ].filter(Boolean));
