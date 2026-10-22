@@ -4,29 +4,29 @@ const APP_MANAGER_URI = 'luna://com.webos.applicationManager';
 const HOMEBREW_SERVICE_URI = 'luna://org.webosbrew.hbchannel.service';
 const APP_MANAGER_LIST_APPS_COMMAND = 'luna-send -n 1 luna://com.webos.applicationManager/listApps {}';
 const APP_MANAGER_LIST_APPS_METHODS = ['dev/listApps', 'listApps'];
-const DEFAULT_APPS = [
-  { id: 'launcher-settings', name: 'Launcher Settings', icon: '⚙', target: '', type: 'internal' }
-];
+const BROWSER_APP_ID = 'com.webos.app.browser';
+const LG_HOME_APP_ID = 'com.webos.app.home';
+const EXCLUDED_APP_IDS = new Set([
+  'com.homeframe.launcher',
+  'com.lgtv.urlviewer',
+  'org.webosbrew.hbchannel',
+  'org.webosbrew.inputhook',
+  'com.lgtv.tvlauncher'
+]);
 const LEGACY_DEFAULT_APP_IDS = new Set(['youtube', 'netflix', 'spotify', 'settings', 'browser', 'music']);
 const appGrid = document.getElementById('launcherGrid');
 const appList = document.getElementById('appList');
 const settingsPanel = document.getElementById('settingsPanel');
 const closeSettings = document.getElementById('closeSettings');
-const addAppForm = document.getElementById('addAppForm');
-const installedAppPicker = document.getElementById('installedAppPicker');
-const installedAppStatus = document.getElementById('installedAppStatus');
-const addInstalledAppButton = document.getElementById('addInstalledApp');
-const appNameInput = document.getElementById('appName');
-const appIconInput = document.getElementById('appIcon');
-const appTargetInput = document.getElementById('appTarget');
+const openSettingsButton = document.getElementById('openSettings');
+const returnHomeButton = document.getElementById('returnHome');
+const settingsStatus = document.getElementById('settingsStatus');
+const launchStatus = document.getElementById('launchStatus');
 const dateText = document.getElementById('dateText');
 const timeText = document.getElementById('timeText');
 const weatherIcon = document.getElementById('weatherIcon');
 const weatherLocation = document.getElementById('weatherLocation');
 const weatherTemp = document.getElementById('weatherTemp');
-const tvStatus = document.getElementById('tvStatus');
-const networkStatus = document.getElementById('networkStatus');
-const sunStatus = document.getElementById('sunStatus');
 
 let apps = loadApps();
 let selectedIndex = 0;
@@ -40,8 +40,8 @@ function withLauncherSettings(savedApps) {
       app
       && typeof app === 'object'
       && typeof app.id === 'string'
-      && app.type !== 'url'
       && !LEGACY_DEFAULT_APP_IDS.has(app.id)
+      && app.id !== 'launcher-settings'
     ))
     .map((app) => {
       const savedApp = { ...app };
@@ -49,22 +49,20 @@ function withLauncherSettings(savedApps) {
       return savedApp;
     });
 
-  if (!migratedApps.some((app) => app.id === 'launcher-settings')) {
-    migratedApps.push({ ...DEFAULT_APPS[DEFAULT_APPS.length - 1] });
-  }
   return migratedApps;
 }
 
 function loadApps() {
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (!saved) return DEFAULT_APPS.map((app) => ({ ...app }));
+  if (!saved) return [];
 
   try {
     const parsed = JSON.parse(saved);
-    if (!Array.isArray(parsed) || !parsed.length) return DEFAULT_APPS.map((app) => ({ ...app }));
+    if (!Array.isArray(parsed)) return [];
     return withLauncherSettings(parsed);
   } catch (error) {
-    return DEFAULT_APPS.map((app) => ({ ...app }));
+    console.warn('Unable to read saved launcher apps', error);
+    return [];
   }
 }
 
@@ -91,7 +89,7 @@ function saveApps() {
 }
 
 function installedAppIconPath(app) {
-  const validPackagePath = /^\/media\/(?:cryptofs|developer)\/apps\/usr\/palm\/applications\/[A-Za-z0-9._-]+$/;
+  const validPackagePath = /^\/(?:media\/(?:cryptofs|developer)|mnt\/otncabi)\/usr\/palm\/applications\/[A-Za-z0-9._-]+$/;
   if (typeof app.folderPath !== 'string'
     || !validPackagePath.test(app.folderPath)
     || !app.folderPath.endsWith(`/${app.id}`)) return '';
@@ -129,11 +127,22 @@ function loadInstalledAppIcon(installedApp) {
             : 'image/png';
         installedApp.iconUrl = `data:${mimeType};base64,${encodedImage}`;
 
-        const tileApp = apps.find((app) => app.id === `webos-${installedApp.id}`);
-        if (tileApp) {
-          tileApp.iconUrl = installedApp.iconUrl;
-          saveApps();
-          renderApps();
+        const tile = [...appGrid.querySelectorAll('.app-tile')]
+          .find((appTile) => appTile.dataset.appId === installedApp.id);
+        if (tile) {
+          const iconContainer = tile.querySelector('.app-icon');
+          const fallbackIcon = iconContainer.querySelector('span');
+          const iconImage = document.createElement('img');
+          iconImage.className = 'app-logo';
+          iconImage.alt = '';
+          iconImage.src = installedApp.iconUrl;
+          iconImage.addEventListener('load', () => {
+            fallbackIcon.hidden = true;
+          });
+          iconImage.addEventListener('error', () => {
+            iconImage.remove();
+          });
+          iconContainer.appendChild(iconImage);
         }
       },
       onFailure: (error) => {
@@ -155,6 +164,7 @@ function renderApps() {
     tile.setAttribute('role', 'button');
     tile.setAttribute('aria-label', app.name);
     tile.dataset.index = String(index);
+    tile.dataset.appId = app.type === 'app' ? app.target : app.id;
     tile.innerHTML = `
       <div class="app-icon"></div>
       <div class="app-name">${escapeHtml(app.name)}</div>
@@ -203,89 +213,75 @@ function renderApps() {
 
 function renderSavedApps() {
   appList.innerHTML = '';
+  const homeApps = [
+    ...installedApps.map((app) => ({
+      id: app.id,
+      name: app.name,
+      icon: app.icon,
+      isInstalled: true
+    })),
+    ...apps
+      .filter((app) => !installedApps.some((installedApp) => installedApp.id === app.target))
+      .map((app) => ({
+        id: app.type === 'app' ? app.target : app.id,
+        name: app.name,
+        icon: app.icon,
+        isInstalled: false
+      }))
+  ];
 
-  apps.forEach((app, index) => {
+  homeApps.forEach((app) => {
     const item = document.createElement('div');
-    item.className = 'saved-app';
-    item.innerHTML = `
-      <div class="saved-app-name">
-        <span class="saved-app-icon">${app.icon || '◉'}</span>
-        <span>${escapeHtml(app.name)}</span>
-      </div>
-      <button class="remove-app" type="button">Remove</button>
-    `;
-
-    item.querySelector('.remove-app').addEventListener('click', () => removeApp(index));
+    item.className = 'visibility-app';
+    const label = document.createElement('label');
+    label.className = 'visibility-label';
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = !hiddenInstalledAppIds.has(app.id);
+    checkbox.dataset.appId = app.id;
+    checkbox.setAttribute('aria-label', `${app.name} on home screen`);
+    checkbox.addEventListener('change', () => {
+      if (checkbox.checked) {
+        hiddenInstalledAppIds.delete(app.id);
+      } else {
+        hiddenInstalledAppIds.add(app.id);
+      }
+      saveHiddenInstalledAppIds();
+      syncInstalledAppsToHomepage();
+      [...appList.querySelectorAll('input[type="checkbox"]')]
+        .find((appCheckbox) => appCheckbox.dataset.appId === app.id)
+        ?.focus();
+    });
+    const icon = document.createElement('span');
+    icon.className = 'visibility-icon';
+    icon.textContent = app.icon || '◉';
+    const name = document.createElement('span');
+    name.className = 'visibility-name';
+    name.textContent = app.name;
+    const type = document.createElement('span');
+    type.className = 'visibility-type';
+    type.textContent = app.isInstalled ? 'Installed' : 'Custom';
+    label.append(checkbox, icon, name, type);
+    item.appendChild(label);
     appList.appendChild(item);
   });
-}
 
-function addApp(event) {
-  event.preventDefault();
-
-  const name = appNameInput.value.trim();
-  const icon = (appIconInput.value || '◉').trim() || '◉';
-  const target = appTargetInput.value.trim();
-  const type = document.querySelector('input[name="launchType"]:checked')?.value || 'url';
-
-  if (!name || !target) return;
-
-  if (type === 'app' && installedApps.some((app) => app.id === target)) {
-    hiddenInstalledAppIds.delete(target);
-    saveHiddenInstalledAppIds();
+  if (!homeApps.length) {
+    const emptyState = document.createElement('p');
+    emptyState.className = 'settings-empty';
+    emptyState.textContent = 'No supported apps were found.';
+    appList.appendChild(emptyState);
   }
-
-  apps.push({
-    id: `${name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`,
-    name,
-    icon: icon.slice(0, 2),
-    target,
-    type
-  });
-
-  selectedIndex = apps.length - 1;
-  saveApps();
-  renderApps();
-  addAppForm.reset();
-  appIconInput.value = '▶';
-  document.querySelector('input[name="launchType"][value="url"]').checked = true;
-  closePanel();
-}
-
-function addInstalledApp() {
-  const selectedApp = installedApps.find((app) => app.id === installedAppPicker.value);
-  if (!selectedApp) return;
-
-  if (apps.some((app) => app.type === 'app' && app.target === selectedApp.id)) {
-    installedAppStatus.textContent = `${selectedApp.name} is already in your launcher.`;
-    return;
-  }
-
-  hiddenInstalledAppIds.delete(selectedApp.id);
-  saveHiddenInstalledAppIds();
-  apps.push({
-    id: `webos-${selectedApp.id}`,
-    name: selectedApp.name,
-    icon: selectedApp.icon,
-    iconUrl: selectedApp.iconUrl,
-    target: selectedApp.id,
-    type: 'app'
-  });
-  selectedIndex = apps.length - 1;
-  saveApps();
-  renderApps();
-  installedAppStatus.textContent = `${selectedApp.name} added to your launcher.`;
 }
 
 function syncInstalledAppsToHomepage() {
   const installedIds = new Set(installedApps.map((app) => app.id));
   const customApps = apps.filter((app) => (
-    app.id !== 'launcher-settings'
-    && !LEGACY_DEFAULT_APP_IDS.has(app.id)
+    !LEGACY_DEFAULT_APP_IDS.has(app.id)
+    && !app.id.startsWith('webos-')
     && !(app.type === 'app' && installedIds.has(app.target))
+    && !hiddenInstalledAppIds.has(app.type === 'app' ? app.target : app.id)
   ));
-  const launcherSettings = apps.find((app) => app.id === 'launcher-settings')
-    || { ...DEFAULT_APPS[0] };
   const installedShortcuts = installedApps
     .filter((app) => !hiddenInstalledAppIds.has(app.id))
     .map((app) => ({
@@ -297,24 +293,22 @@ function syncInstalledAppsToHomepage() {
       type: 'app'
     }));
 
-  apps = [...installedShortcuts, ...customApps, launcherSettings];
+  apps = [...installedShortcuts, ...customApps];
   selectedIndex = Math.max(0, Math.min(selectedIndex, apps.length - 1));
   saveApps();
   renderApps();
 }
 
 function loadInstalledApps() {
-  installedAppPicker.replaceChildren(new Option('Loading installed apps...', ''));
-  addInstalledAppButton.disabled = true;
-  installedAppStatus.textContent = 'Finding installed apps...';
+  settingsStatus.textContent = 'Finding apps on this TV…';
 
   const setInstalledApps = (availableApps) => {
     installedApps = availableApps
       .filter((app) => app
         && typeof app.id === 'string'
         && app.id
-        && app.systemApp !== true
-        && app.id !== 'com.lgtv.tvlauncher')
+        && !EXCLUDED_APP_IDS.has(app.id)
+        && (app.systemApp !== true || app.id === BROWSER_APP_ID))
       .map((app) => ({
         id: app.id,
         name: typeof app.title === 'string' && app.title.trim() ? app.title.trim() : app.id,
@@ -322,17 +316,13 @@ function loadInstalledApps() {
         iconPath: installedAppIconPath(app)
       }))
       .sort((first, second) => first.name.localeCompare(second.name));
-    installedAppPicker.replaceChildren();
     if (!installedApps.length) {
-      installedAppPicker.add(new Option('No installed apps found', ''));
+      settingsStatus.textContent = 'No supported apps were found on this TV.';
+      renderSavedApps();
       return false;
     }
 
-    installedAppPicker.add(new Option('Choose an app...', ''));
-    installedApps.forEach((app) => {
-      installedAppPicker.add(new Option(`${app.name} (${app.id})`, app.id));
-    });
-    installedAppStatus.textContent = `${installedApps.length} installed apps found.`;
+    settingsStatus.textContent = `${installedApps.length} apps found. Toggle apps to show or hide them.`;
     syncInstalledAppsToHomepage();
     installedApps.forEach(loadInstalledAppIcon);
     return true;
@@ -359,10 +349,9 @@ function loadInstalledApps() {
   const tryMethod = (index) => {
     if (index >= APP_MANAGER_LIST_APPS_METHODS.length) {
       console.warn('Unable to list installed webOS apps', failures);
-      installedAppPicker.replaceChildren(new Option('Installed app list unavailable', ''));
-      installedAppStatus.textContent = failures.length
-        ? `Could not read the TV app list (${failures.join('; ')}). You can still add an app ID below.`
-        : 'The TV returned no installed apps. You can still add an app ID below.';
+      settingsStatus.textContent = failures.length
+        ? `Could not read the TV app list (${failures.join('; ')}). Check that Homebrew root access is enabled.`
+        : 'The TV returned no installed apps.';
       return;
     }
 
@@ -454,22 +443,6 @@ function loadInstalledApps() {
   tryHomebrewService();
 }
 
-function removeApp(index) {
-  if (apps.length <= 1) return;
-
-  const [removedApp] = apps.splice(index, 1);
-  if (removedApp.type === 'app'
-    && (removedApp.id === `webos-${removedApp.target}`
-      || installedApps.some((app) => app.id === removedApp.target))) {
-    hiddenInstalledAppIds.add(removedApp.target);
-    saveHiddenInstalledAppIds();
-  }
-  if (selectedIndex >= apps.length) selectedIndex = Math.max(apps.length - 1, 0);
-
-  saveApps();
-  renderApps();
-}
-
 function launchApp(app) {
   if (!app) return;
 
@@ -479,11 +452,14 @@ function launchApp(app) {
     const handleFailure = (error) => {
       const detail = error?.errorText || error?.message || 'Unknown launch error';
       console.error(`Unable to launch ${app.name} (${target})`, error);
-      tvStatus.textContent = `Could not open ${app.name}: ${detail}`;
+      launchStatus.textContent = `Could not open ${app.name}: ${detail}`;
+      launchStatus.classList.add('visible');
     };
 
     const handleSuccess = () => {
-      tvStatus.textContent = `Opening ${app.name}...`;
+      launchStatus.textContent = `Opening ${app.name}…`;
+      launchStatus.classList.add('visible');
+      window.setTimeout(() => launchStatus.classList.remove('visible'), 2400);
     };
 
     try {
@@ -523,14 +499,9 @@ function launchApp(app) {
     return;
   }
 
-  tvStatus.textContent = `Opened: ${app.name}`;
 }
 
 function activateApp(app) {
-  if (app?.id === 'launcher-settings') {
-    openPanel();
-    return;
-  }
   launchApp(app);
 }
 
@@ -538,7 +509,7 @@ function openPanel() {
   settingsOpen = true;
   settingsPanel.classList.remove('hidden');
   loadInstalledApps();
-  installedAppPicker.focus();
+  closeSettings.focus();
 }
 
 function closePanel() {
@@ -581,51 +552,28 @@ function updateClock() {
 }
 
 function updateWeather() {
-  if (!navigator.geolocation) {
-    weatherLocation.textContent = 'Default';
-    weatherTemp.textContent = '19°';
-    weatherIcon.textContent = '☀️';
-    sunStatus.textContent = '06:30 / 19:45';
-    return;
-  }
+  const latitude = 54.2361;
+  const longitude = -4.5481;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&timezone=auto`;
+  weatherLocation.textContent = 'Isle of Man';
 
-  navigator.geolocation.getCurrentPosition(
-    async (position) => {
-      const lat = position.coords.latitude;
-      const lon = position.coords.longitude;
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto&forecast_days=1`;
-
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
-        const current = data.current;
-        const temp = Math.round(current?.temperature_2m ?? 20);
-        const weatherCode = current?.weather_code ?? 0;
-
-        weatherLocation.textContent = data.timezone?.split('/').slice(-1)[0] || 'Local';
-        weatherTemp.textContent = `${temp}°`;
-        weatherIcon.textContent = weatherEmoji(weatherCode);
-
-        if (data.daily && data.daily.sunrise && data.daily.sunset) {
-          const sunrise = new Date(data.daily.sunrise[0]);
-          const sunset = new Date(data.daily.sunset[0]);
-          sunStatus.textContent = `${sunrise.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} / ${sunset.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-        }
-      } catch (error) {
-        weatherLocation.textContent = 'Weather';
-        weatherTemp.textContent = '--°';
-        weatherIcon.textContent = '☁️';
-        sunStatus.textContent = '--:-- / --:--';
+  fetch(url)
+    .then((response) => {
+      if (!response.ok) throw new Error(`Weather request failed (${response.status})`);
+      return response.json();
+    })
+    .then((data) => {
+      if (!data.current || typeof data.current.temperature_2m !== 'number') {
+        throw new Error('Weather response did not include current conditions');
       }
-    },
-    () => {
-      weatherLocation.textContent = 'Default';
-      weatherTemp.textContent = '19°';
-      weatherIcon.textContent = '☀️';
-      sunStatus.textContent = '06:30 / 19:45';
-    },
-    { enableHighAccuracy: false, timeout: 8000 }
-  );
+      weatherTemp.textContent = `${Math.round(data.current.temperature_2m)}°`;
+      weatherIcon.textContent = weatherEmoji(data.current.weather_code);
+    })
+    .catch((error) => {
+      console.warn('Unable to load Isle of Man weather', error);
+      weatherTemp.textContent = '--°';
+      weatherIcon.textContent = '☁';
+    });
 }
 
 function weatherEmoji(code) {
@@ -660,12 +608,6 @@ function weatherEmoji(code) {
   }
 }
 
-function updateNetworkStatus() {
-  const online = navigator.onLine;
-  networkStatus.textContent = online ? 'Online' : 'Offline';
-  tvStatus.textContent = online ? 'Ready' : 'Limited';
-}
-
 function handleKeyNavigation(event) {
   const key = event.key;
   const backPressed = key === 'Escape'
@@ -677,21 +619,32 @@ function handleKeyNavigation(event) {
     || event.which === 461;
 
   if (settingsOpen && backPressed) {
+    backKeyHandled = true;
     closePanel();
     event.preventDefault();
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     return;
   }
 
   if (settingsOpen) return;
 
   const activeElement = document.activeElement;
+  if (activeElement === openSettingsButton && key === 'ArrowLeft') {
+    focusApp(apps.length - 1);
+    event.preventDefault();
+    return;
+  }
+
   const currentIndex = activeElement.classList.contains('app-tile')
     ? Number(activeElement.dataset.index)
     : selectedIndex;
 
   if (key === 'ArrowRight' || key === 'd') {
-    focusApp(currentIndex + 1);
+    if (activeElement.classList.contains('app-tile') && currentIndex === apps.length - 1) {
+      openSettingsButton.focus();
+    } else {
+      focusApp(currentIndex + 1);
+    }
     event.preventDefault();
   } else if (key === 'ArrowLeft' || key === 'a') {
     focusApp(currentIndex - 1);
@@ -699,6 +652,9 @@ function handleKeyNavigation(event) {
   } else if (key === 'Enter' || key === ' ') {
     if (activeElement.classList.contains('app-tile')) {
       activateApp(apps[currentIndex]);
+      event.preventDefault();
+    } else if (activeElement === openSettingsButton) {
+      openPanel();
       event.preventDefault();
     } else {
       focusGrid();
@@ -709,15 +665,28 @@ function handleKeyNavigation(event) {
   }
 }
 
+let backKeyHandled = false;
+
 closeSettings.addEventListener('click', closePanel);
-addInstalledAppButton.addEventListener('click', addInstalledApp);
-installedAppPicker.addEventListener('change', () => {
-  addInstalledAppButton.disabled = !installedAppPicker.value;
+openSettingsButton.addEventListener('click', openPanel);
+returnHomeButton.addEventListener('click', () => {
+  launchApp({ name: 'LG Home', target: LG_HOME_APP_ID, type: 'app' });
 });
-addAppForm.addEventListener('submit', addApp);
 document.addEventListener('keydown', handleKeyNavigation, true);
-window.addEventListener('online', updateNetworkStatus);
-window.addEventListener('offline', updateNetworkStatus);
+document.addEventListener('keyup', (event) => {
+  const backPressed = event.key === 'Escape'
+    || event.key === 'Backspace'
+    || event.key === 'Back'
+    || event.key === 'BrowserBack'
+    || event.key === 'GoBack'
+    || event.keyCode === 461
+    || event.which === 461;
+  if (backKeyHandled || (settingsOpen && backPressed)) {
+    backKeyHandled = false;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+}, true);
 
 function escapeHtml(value) {
   return String(value)
@@ -730,7 +699,6 @@ function escapeHtml(value) {
 
 updateClock();
 updateWeather();
-updateNetworkStatus();
 renderApps();
 loadInstalledApps();
 setInterval(updateClock, 30000);
