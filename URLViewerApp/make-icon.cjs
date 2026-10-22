@@ -68,6 +68,6 @@ cp.execFileSync('powershell.exe', [
   '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File',
   path.join(__dirname, 'make-icon-title.ps1'),
   baseIconPath,
-  path.join(__dirname, 'urlviewer-icon-1.0.10.png')
+  path.join(__dirname, 'urlviewer-icon-1.0.11.png')
 ], { stdio: 'inherit' });
 fs.unlinkSync(baseIconPath);
