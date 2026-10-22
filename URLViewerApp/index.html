@@ -28,8 +28,16 @@
     body.viewing { display: block; }
     body.viewing main { display: none; }
     body.viewing #viewer { display: block; }
+    html.opening-default body { visibility: hidden; background: #080b12; }
     @media (max-width: 700px) { main { padding: 30px; } form { flex-direction: column; } input, button { width: 100%; } }
   </style>
+  <script>
+    try {
+      if (localStorage.getItem('urlviewer.defaultAddress')) {
+        document.documentElement.classList.add('opening-default');
+      }
+    } catch (_) {}
+  </script>
 </head>
 <body>
   <main>
@@ -142,6 +150,7 @@
       try {
         window.location.assign(getValidAddress().href);
       } catch (error) {
+        document.documentElement.classList.remove('opening-default');
         message.textContent = error.message;
         address.focus();
       }
