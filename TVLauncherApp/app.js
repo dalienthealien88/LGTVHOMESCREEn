@@ -476,14 +476,46 @@ function launchApp(app) {
   const target = app.target || '';
 
   if (app.type === 'app' && target) {
+    const handleFailure = (error) => {
+      const detail = error?.errorText || error?.message || 'Unknown launch error';
+      console.error(`Unable to launch ${app.name} (${target})`, error);
+      tvStatus.textContent = `Could not open ${app.name}: ${detail}`;
+    };
+
+    const handleSuccess = () => {
+      tvStatus.textContent = `Opening ${app.name}...`;
+    };
+
     try {
-      if (window.PalmSystem) {
-        window.location.href = `luna://com.webos.applicationManager/launch?appId=${encodeURIComponent(target)}`;
-        return;
+      if (window.webOS?.service?.request) {
+        window.webOS.service.request(APP_MANAGER_URI, {
+          method: 'launch',
+          parameters: { id: target },
+          onSuccess: handleSuccess,
+          onFailure: handleFailure
+        });
+      } else if (typeof window.PalmServiceBridge === 'function') {
+        const bridge = new window.PalmServiceBridge();
+        bridge.onservicecallback = (message) => {
+          try {
+            const response = JSON.parse(message);
+            if (response.returnValue === false) {
+              handleFailure(response);
+            } else {
+              handleSuccess(response);
+            }
+          } catch (error) {
+            handleFailure(error);
+          }
+        };
+        bridge.call(`${APP_MANAGER_URI}/launch`, JSON.stringify({ id: target }));
+      } else {
+        handleFailure(new Error('webOS service bridge is unavailable.'));
       }
     } catch (error) {
-      console.warn('Launch failed', error);
+      handleFailure(error);
     }
+    return;
   }
 
   if (target.startsWith('http://') || target.startsWith('https://')) {
