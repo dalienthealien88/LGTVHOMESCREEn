@@ -19,3 +19,7 @@ URL Viewer lets you enter and open a website address on the TV. **Open** loads i
 In Homebrew Channel, refresh the repository and install **URL Viewer** (app ID `com.lgtv.urlviewer`). The repository URL is:
 
 `https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/repo.json`
+
+## TV Launcher
+
+In Homebrew Channel, refresh the same repository and install **TV Launcher** (app ID `com.lgtv.tvlauncher`). After installing, assign the app using your TV's custom remote button mapping; it does not replace the stock launcher.
