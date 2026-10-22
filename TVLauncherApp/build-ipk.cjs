@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
+const crypto = require('crypto');
 
 const base = __dirname;
 const repoRoot = path.dirname(base);
@@ -75,6 +76,13 @@ for (const [name, data] of parts) {
   if (data.length % 2) packageParts.push(Buffer.from('\n'));
 }
 
-fs.writeFileSync(outputPath, Buffer.concat(packageParts));
+const packageBuffer = Buffer.concat(packageParts);
+fs.writeFileSync(outputPath, packageBuffer);
+const manifestPath = path.join(repoRoot, 'tvlauncher.manifest.json');
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+manifest.ipkHash = {
+  sha256: crypto.createHash('sha256').update(packageBuffer).digest('hex')
+};
+fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 fs.rmSync(tempPath, { recursive: true, force: true });
 console.log(`${outputPath} (${fs.statSync(outputPath).size} bytes)`);

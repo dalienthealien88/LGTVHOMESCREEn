@@ -6,5 +6,8 @@
   "type": "web",
   "sourceUrl": "https://github.com/dalienthealien88/LGTVHOMESCREEn",
   "iconUri": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/TVLauncherApp/icon.png",
+  "ipkHash": {
+    "sha256": "69cf6a39e185f3aded2005fde7a0fc531d18e13d04d980637ae943e7d63b76b4"
+  },
   "id": "com.lgtv.tvlauncher"
 }
