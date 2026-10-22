@@ -1,13 +1,13 @@
 {
   "title": "URL Viewer",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "ipkUrl": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/URLViewer.ipk",
   "appDescription": "Open a website address on your LG webOS TV",
   "type": "web",
   "sourceUrl": "https://github.com/dalienthealien88/LGTVHOMESCREEn",
-  "iconUri": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/icon-urlviewer-1.0.8.png",
+  "iconUri": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/icon-urlviewer-1.0.9.png",
   "ipkHash": {
-    "sha256": "abc0aa202588d02cf85ee4f425123b1073e98973ee102cf15a3f28043a665112"
+    "sha256": "4baa7e6b39b27ef06ad27d540067c1a0b1a82683686aa5224d405119d3ca3bfa"
   },
   "id": "com.lgtv.urlviewer"
 }
