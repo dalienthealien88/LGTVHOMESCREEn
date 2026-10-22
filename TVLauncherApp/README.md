@@ -21,6 +21,4 @@ A separate, custom TV-friendly launcher built as a new app alongside the existin
 
 ## Packaging
 
-This is intended as a standalone webOS app package, not a replacement for the stock launcher.
-
-Use LG webOS packaging tools to build an IPK from the `TVLauncherApp` folder and install it with a custom remote button mapping.
+Run `node TVLauncherApp/build-ipk.cjs` from the repository root to create `TVLauncher.ipk`. The package is a standalone webOS app, not a replacement for the stock launcher. Install it using your supported webOS homebrew or developer installation method, then assign it through a custom remote button mapping.

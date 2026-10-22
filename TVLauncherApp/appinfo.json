@@ -1,12 +1,15 @@
 {
   "id": "com.lgtv.tvlauncher",
   "version": "1.0.0",
+  "vendor": "LGTV Homebrew",
   "title": "TV Launcher",
+  "appDescription": "A custom TV launcher with weather, app grid, and settings",
   "type": "web",
   "main": "index.html",
-  "icon": "icon.svg",
-  "largeIcon": "icon.svg",
-  "splashBackground": "#07131d",
-  "allowAudioPlayback": true,
-  "disableBackHistoryAPI": false
+  "icon": "icon.png",
+  "largeIcon": "icon.png",
+  "resolution": "1920x1080",
+  "requiredMemory": 16,
+  "transparent": false,
+  "requiredACG": []
 }
