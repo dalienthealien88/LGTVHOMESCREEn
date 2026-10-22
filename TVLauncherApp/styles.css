@@ -1,0 +1,399 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-1: #040b13;
+  --bg-2: #0d1d2e;
+  --panel: rgba(18, 28, 39, 0.72);
+  --panel-strong: rgba(7, 12, 18, 0.8);
+  --tile: rgba(255, 255, 255, 0.06);
+  --tile-hover: rgba(130, 200, 255, 0.16);
+  --accent: #69d0ff;
+  --accent-2: #8effd1;
+  --text: #edf8ff;
+  --muted: #becee0;
+  --shadow: rgba(0, 0, 0, 0.36);
+  --focus: #fff6b7;
+}
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top, rgba(93, 138, 184, 0.34), transparent 28%),
+    linear-gradient(135deg, var(--bg-1), var(--bg-2));
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button, input {
+  font: inherit;
+}
+
+.app-shell {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  padding: 24px 28px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.panel {
+  background: rgba(10, 15, 22, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 16px 30px var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.clock-panel {
+  min-width: 210px;
+  padding: 14px 18px;
+}
+
+.date-label {
+  font-size: 0.76rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.time-value {
+  margin-top: 8px;
+  font-size: clamp(2.2rem, 3vw, 3.8rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.weather-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  min-width: 210px;
+}
+
+.weather-icon {
+  font-size: 2.4rem;
+}
+
+.weather-copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.weather-location {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.weather-temp {
+  font-size: 1.9rem;
+  font-weight: 700;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.status-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255,255,255,0.04);
+  padding: 8px 14px;
+  color: var(--muted);
+}
+
+.status-pill span {
+  color: var(--text);
+  opacity: 0.9;
+  font-weight: 600;
+}
+
+.launcher-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 20px;
+  align-content: center;
+  padding-top: 8px;
+}
+
+.app-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 160px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 18px 30px rgba(0,0,0,0.2);
+  cursor: pointer;
+  outline: none;
+  transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.app-tile:hover,
+.app-tile:focus-visible,
+.app-tile.active {
+  transform: translateY(-2px);
+  border-color: rgba(105, 208, 255, 0.8);
+  background: linear-gradient(180deg, rgba(105, 208, 255, 0.16), rgba(255, 255, 255, 0.06));
+}
+
+.app-tile:focus-visible,
+.app-tile.active {
+  box-shadow: 0 0 0 3px var(--focus), 0 18px 30px rgba(0,0,0,0.2);
+}
+
+.app-icon {
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(105,208,255,0.2), rgba(142,255,209,0.2));
+  border: 1px solid rgba(255,255,255,0.1);
+  font-size: 2.3rem;
+  margin-bottom: 14px;
+}
+
+.app-name {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.app-type {
+  margin-top: 4px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.settings-toggle {
+  position: absolute;
+  right: 26px;
+  bottom: 22px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: linear-gradient(180deg, rgba(7, 14, 20, 0.9), rgba(16, 34, 48, 0.84));
+  color: var(--text);
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow: 0 18px 34px rgba(0,0,0,0.24);
+}
+
+.settings-toggle:focus-visible,
+.close-button:focus-visible,
+.primary-button:focus-visible,
+input:focus-visible,
+button:focus-visible {
+  box-shadow: 0 0 0 3px var(--focus);
+  outline: none;
+}
+
+.settings-panel {
+  position: absolute;
+  right: 22px;
+  bottom: 70px;
+  width: min(420px, calc(100vw - 42px));
+  padding: 16px 16px 12px;
+  border-radius: 22px;
+  background: rgba(8, 15, 22, 0.94);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 30px 52px rgba(0,0,0,0.42);
+  backdrop-filter: blur(12px);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.settings-panel.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px) scale(0.98);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.close-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.add-app-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.add-app-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
+.add-app-form input {
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  padding: 10px 12px;
+}
+
+.radio-row {
+  display: flex;
+  gap: 16px;
+}
+
+.radio-option {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.radio-option input {
+  width: 18px;
+  height: 18px;
+}
+
+.primary-button {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #062032;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.saved-apps-wrap h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.saved-apps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  overflow: auto;
+}
+
+.saved-app {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.saved-app-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.saved-app-icon {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(105, 208, 255, 0.14);
+}
+
+.remove-app {
+  border: 1px solid rgba(255, 123, 123, 0.4);
+  background: rgba(255, 123, 123, 0.08);
+  border-radius: 8px;
+  color: #ffd1d1;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    padding: 16px 16px 20px;
+  }
+
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .clock-panel,
+  .weather-panel {
+    width: 100%;
+  }
+
+  .launcher-grid {
+    grid-template-columns: repeat(2, minmax(130px, 1fr));
+  }
+
+  .settings-panel {
+    right: 10px;
+    bottom: 60px;
+    width: calc(100vw - 20px);
+  }
+}

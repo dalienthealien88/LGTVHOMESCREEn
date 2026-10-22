@@ -1,0 +1,10 @@
+{
+  "title": "TV Launcher",
+  "version": "1.0.0",
+  "ipkUrl": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/TVLauncher.ipk",
+  "appDescription": "A custom TV launcher with weather, app grid, and settings",
+  "type": "web",
+  "sourceUrl": "https://github.com/dalienthealien88/LGTVHOMESCREEn",
+  "iconUri": "https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/TVLauncherApp/icon.svg",
+  "id": "com.lgtv.tvlauncher"
+}

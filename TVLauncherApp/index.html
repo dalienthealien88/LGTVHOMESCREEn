@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TV Launcher</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="clock-panel panel">
+          <div id="dateText" class="date-label">Loading date...</div>
+          <div id="timeText" class="time-value">--:--</div>
+        </div>
+
+        <div class="weather-panel panel" aria-live="polite">
+          <div id="weatherIcon" class="weather-icon" aria-hidden="true">☀️</div>
+          <div class="weather-copy">
+            <div id="weatherLocation" class="weather-location">Locating...</div>
+            <div id="weatherTemp" class="weather-temp">--°</div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="status-row">
+          <div class="status-pill"><span>TV</span><strong id="tvStatus">Ready</strong></div>
+          <div class="status-pill"><span>Wi‑Fi</span><strong id="networkStatus">Checking...</strong></div>
+          <div class="status-pill"><span>Sun</span><strong id="sunStatus">--:--</strong></div>
+        </div>
+
+        <section id="launcherGrid" class="launcher-grid" aria-label="TV app grid"></section>
+      </main>
+
+      <button id="settingsToggle" class="settings-toggle" type="button">Settings</button>
+
+      <aside id="settingsPanel" class="settings-panel hidden" aria-label="TV Launcher settings">
+        <div class="panel-header">
+          <h2>Custom apps</h2>
+          <button id="closeSettings" class="close-button" type="button" aria-label="Close settings">✕</button>
+        </div>
+
+        <form id="addAppForm" class="add-app-form">
+          <label>
+            App name
+            <input id="appName" type="text" maxlength="24" placeholder="Prime Video" required />
+          </label>
+
+          <label>
+            Icon
+            <input id="appIcon" type="text" maxlength="2" value="▶" placeholder="▶" />
+          </label>
+
+          <label>
+            URL or app ID
+            <input id="appTarget" type="text" required placeholder="https://example.com or com.app.id" />
+          </label>
+
+          <div class="radio-row">
+            <label class="radio-option">
+              <input type="radio" name="launchType" value="url" checked />
+              <span>URL</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="launchType" value="app" />
+              <span>App ID</span>
+            </label>
+          </div>
+
+          <button type="submit" class="primary-button">Add app</button>
+        </form>
+
+        <div class="saved-apps-wrap">
+          <h3>Saved apps</h3>
+          <div id="appList" class="saved-apps"></div>
+        </div>
+      </aside>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
