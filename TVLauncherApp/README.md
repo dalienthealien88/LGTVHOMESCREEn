@@ -9,6 +9,7 @@ A separate, custom TV-friendly launcher built as a new app alongside the existin
 - bottom-right settings drawer
 - add/remove apps with local persistence
 - remote-friendly D-pad navigation
+- directional access to the bottom-right settings button
 - app launch support for URLs and webOS app IDs
 
 ## Files
