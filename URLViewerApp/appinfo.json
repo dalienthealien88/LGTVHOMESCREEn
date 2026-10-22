@@ -1,6 +1,6 @@
 {
   "id": "com.lgtv.urlviewer",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "vendor": "LGTV Homebrew",
   "type": "web",
   "main": "index.html",

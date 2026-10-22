@@ -137,14 +137,6 @@
       window.location.assign(url.href);
     });
 
-    if (defaultAddress) {
-      try {
-        window.location.replace(getValidAddress().href);
-      } catch (error) {
-        message.textContent = error.message;
-        address.focus();
-      }
-    }
   </script>
 </body>
 </html>
