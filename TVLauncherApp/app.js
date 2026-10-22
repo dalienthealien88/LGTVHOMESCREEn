@@ -1,18 +1,13 @@
 const STORAGE_KEY = 'tvlauncher.apps.v1';
-const NETFLIX_APP_ID = 'netflix';
+const HIDDEN_INSTALLED_APPS_KEY = 'tvlauncher.hidden-apps.v1';
 const APP_MANAGER_URI = 'luna://com.webos.applicationManager';
 const HOMEBREW_SERVICE_URI = 'luna://org.webosbrew.hbchannel.service';
-const APP_MANAGER_LIST_APPS_COMMAND = 'luna-send-pub -n 1 luna://com.webos.applicationManager/dev/listApps {}';
+const APP_MANAGER_LIST_APPS_COMMAND = 'luna-send -n 1 luna://com.webos.applicationManager/listApps {}';
 const APP_MANAGER_LIST_APPS_METHODS = ['dev/listApps', 'listApps'];
 const DEFAULT_APPS = [
-  { id: 'youtube', name: 'YouTube', icon: '▶', target: 'https://www.youtube.com/', type: 'url' },
-  { id: 'netflix', name: 'Netflix', icon: 'N', target: NETFLIX_APP_ID, type: 'app' },
-  { id: 'spotify', name: 'Spotify', icon: '♫', target: 'https://open.spotify.com/', type: 'url' },
-  { id: 'settings', name: 'TV Settings', icon: '⚙', target: 'com.webos.app.settings', type: 'app' },
-  { id: 'browser', name: 'Browser', icon: '🌐', target: 'com.webos.app.browser', type: 'app' },
-  { id: 'music', name: 'Media', icon: '♪', target: 'com.webos.app.music', type: 'app' },
   { id: 'launcher-settings', name: 'Launcher Settings', icon: '⚙', target: '', type: 'internal' }
 ];
+const LEGACY_DEFAULT_APP_IDS = new Set(['youtube', 'netflix', 'spotify', 'settings', 'browser', 'music']);
 const appGrid = document.getElementById('launcherGrid');
 const appList = document.getElementById('appList');
 const settingsPanel = document.getElementById('settingsPanel');
@@ -37,14 +32,15 @@ let apps = loadApps();
 let selectedIndex = 0;
 let settingsOpen = false;
 let installedApps = [];
+let hiddenInstalledAppIds = loadHiddenInstalledAppIds();
 
 function withLauncherSettings(savedApps) {
-  const migratedApps = savedApps.map((app) => (
-    app.id === 'settings' && app.name === 'Settings'
-      ? { ...app, name: 'TV Settings' }
-      : app.id === 'netflix'
-        ? { ...app, target: NETFLIX_APP_ID, type: 'app' }
-        : app
+  const migratedApps = savedApps.filter((app) => (
+    app
+    && typeof app === 'object'
+    && typeof app.id === 'string'
+    && app.type !== 'url'
+    && !LEGACY_DEFAULT_APP_IDS.has(app.id)
   ));
 
   if (!migratedApps.some((app) => app.id === 'launcher-settings')) {
@@ -64,6 +60,20 @@ function loadApps() {
   } catch (error) {
     return DEFAULT_APPS.map((app) => ({ ...app }));
   }
+}
+
+function loadHiddenInstalledAppIds() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(HIDDEN_INSTALLED_APPS_KEY) || '[]');
+    return new Set(Array.isArray(parsed) ? parsed.filter((id) => typeof id === 'string') : []);
+  } catch (error) {
+    console.warn('Unable to read hidden installed apps', error);
+    return new Set();
+  }
+}
+
+function saveHiddenInstalledAppIds() {
+  localStorage.setItem(HIDDEN_INSTALLED_APPS_KEY, JSON.stringify([...hiddenInstalledAppIds]));
 }
 
 function saveApps() {
@@ -137,6 +147,11 @@ function addApp(event) {
 
   if (!name || !target) return;
 
+  if (type === 'app' && installedApps.some((app) => app.id === target)) {
+    hiddenInstalledAppIds.delete(target);
+    saveHiddenInstalledAppIds();
+  }
+
   apps.push({
     id: `${name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`,
     name,
@@ -163,6 +178,8 @@ function addInstalledApp() {
     return;
   }
 
+  hiddenInstalledAppIds.delete(selectedApp.id);
+  saveHiddenInstalledAppIds();
   apps.push({
     id: `webos-${selectedApp.id}`,
     name: selectedApp.name,
@@ -174,6 +191,31 @@ function addInstalledApp() {
   saveApps();
   renderApps();
   installedAppStatus.textContent = `${selectedApp.name} added to your launcher.`;
+}
+
+function syncInstalledAppsToHomepage() {
+  const installedIds = new Set(installedApps.map((app) => app.id));
+  const customApps = apps.filter((app) => (
+    app.id !== 'launcher-settings'
+    && !LEGACY_DEFAULT_APP_IDS.has(app.id)
+    && !(app.type === 'app' && installedIds.has(app.target))
+  ));
+  const launcherSettings = apps.find((app) => app.id === 'launcher-settings')
+    || { ...DEFAULT_APPS[0] };
+  const installedShortcuts = installedApps
+    .filter((app) => !hiddenInstalledAppIds.has(app.id))
+    .map((app) => ({
+      id: `webos-${app.id}`,
+      name: app.name,
+      icon: app.icon,
+      target: app.id,
+      type: 'app'
+    }));
+
+  apps = [...installedShortcuts, ...customApps, launcherSettings];
+  selectedIndex = Math.max(0, Math.min(selectedIndex, apps.length - 1));
+  saveApps();
+  renderApps();
 }
 
 function loadInstalledApps() {
@@ -205,6 +247,7 @@ function loadInstalledApps() {
       installedAppPicker.add(new Option(`${app.name} (${app.id})`, app.id));
     });
     installedAppStatus.textContent = `${installedApps.length} installed apps found.`;
+    syncInstalledAppsToHomepage();
     return true;
   };
 
@@ -327,7 +370,13 @@ function loadInstalledApps() {
 function removeApp(index) {
   if (apps.length <= 1) return;
 
-  apps.splice(index, 1);
+  const [removedApp] = apps.splice(index, 1);
+  if (removedApp.type === 'app'
+    && (removedApp.id === `webos-${removedApp.target}`
+      || installedApps.some((app) => app.id === removedApp.target))) {
+    hiddenInstalledAppIds.add(removedApp.target);
+    saveHiddenInstalledAppIds();
+  }
   if (selectedIndex >= apps.length) selectedIndex = Math.max(apps.length - 1, 0);
 
   saveApps();
@@ -564,5 +613,6 @@ updateClock();
 updateWeather();
 updateNetworkStatus();
 renderApps();
+loadInstalledApps();
 setInterval(updateClock, 30000);
 setInterval(updateWeather, 900000);
