@@ -9,7 +9,7 @@ A separate, custom TV-friendly launcher built as a new app alongside the existin
 - weather + clock widgets
 - launcher settings tile in the app grid
 - add/remove apps with local persistence
-- select apps from the TV's webOS launch-point list
+- select apps from the TV's webOS Application Manager app list
 - add custom URLs or webOS app IDs
 - remote-friendly D-pad navigation
 - D-pad navigation through the app carousel and launcher settings
@@ -23,6 +23,8 @@ A separate, custom TV-friendly launcher built as a new app alongside the existin
 - `app.js`
 - `appinfo.json`
 - `icon.png`
+- `webOSTV.js` (webOS service bridge library)
+- `WEBOSTV-LICENSE.txt`
 
 ## Packaging
 
