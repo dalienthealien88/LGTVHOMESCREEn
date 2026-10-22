@@ -35,13 +35,19 @@ let installedApps = [];
 let hiddenInstalledAppIds = loadHiddenInstalledAppIds();
 
 function withLauncherSettings(savedApps) {
-  const migratedApps = savedApps.filter((app) => (
-    app
-    && typeof app === 'object'
-    && typeof app.id === 'string'
-    && app.type !== 'url'
-    && !LEGACY_DEFAULT_APP_IDS.has(app.id)
-  ));
+  const migratedApps = savedApps
+    .filter((app) => (
+      app
+      && typeof app === 'object'
+      && typeof app.id === 'string'
+      && app.type !== 'url'
+      && !LEGACY_DEFAULT_APP_IDS.has(app.id)
+    ))
+    .map((app) => {
+      const savedApp = { ...app };
+      delete savedApp.iconUrl;
+      return savedApp;
+    });
 
   if (!migratedApps.some((app) => app.id === 'launcher-settings')) {
     migratedApps.push({ ...DEFAULT_APPS[DEFAULT_APPS.length - 1] });
@@ -77,20 +83,66 @@ function saveHiddenInstalledAppIds() {
 }
 
 function saveApps() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(apps));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(apps.map((app) => {
+    const savedApp = { ...app };
+    delete savedApp.iconUrl;
+    return savedApp;
+  })));
 }
 
-function installedAppIconUrl(app) {
-  if (typeof app.folderPath !== 'string' || !app.folderPath.startsWith('/')) return '';
+function installedAppIconPath(app) {
+  const validPackagePath = /^\/media\/(?:cryptofs|developer)\/apps\/usr\/palm\/applications\/[A-Za-z0-9._-]+$/;
+  if (typeof app.folderPath !== 'string'
+    || !validPackagePath.test(app.folderPath)
+    || !app.folderPath.endsWith(`/${app.id}`)) return '';
 
   const iconName = [app.extraLargeIcon, app.largeIcon, app.mediumLargeIcon, app.icon]
     .find((name) => typeof name === 'string' && name.trim());
-  if (!iconName || iconName.startsWith('/') || iconName.split('/').includes('..')) return '';
+  if (!iconName || iconName.startsWith('/')) return '';
 
-  const path = [...app.folderPath.split('/'), ...iconName.split('/')]
-    .map((part) => encodeURIComponent(part))
-    .join('/');
-  return `file://${path}`;
+  const iconParts = iconName.split('/');
+  if (iconParts.some((part) => !/^[A-Za-z0-9._-]+$/.test(part) || part === '.' || part === '..')) return '';
+  return `${app.folderPath}/${iconParts.join('/')}`;
+}
+
+function loadInstalledAppIcon(installedApp) {
+  if (!installedApp.iconPath || !window.webOS?.service?.request) return;
+
+  try {
+    window.webOS.service.request(HOMEBREW_SERVICE_URI, {
+      method: 'exec',
+      parameters: { command: `base64 '${installedApp.iconPath}'` },
+      onSuccess: (response) => {
+        const encodedImage = typeof response?.stdoutString === 'string'
+          ? response.stdoutString.replace(/\s/g, '')
+          : '';
+        if (response?.returnValue === false || !/^[A-Za-z0-9+/]+=*$/.test(encodedImage)) {
+          console.warn(`Unable to load icon for ${installedApp.name}`, response);
+          return;
+        }
+
+        const extension = installedApp.iconPath.split('.').pop().toLowerCase();
+        const mimeType = extension === 'jpg' || extension === 'jpeg'
+          ? 'image/jpeg'
+          : extension === 'svg'
+            ? 'image/svg+xml'
+            : 'image/png';
+        installedApp.iconUrl = `data:${mimeType};base64,${encodedImage}`;
+
+        const tileApp = apps.find((app) => app.id === `webos-${installedApp.id}`);
+        if (tileApp) {
+          tileApp.iconUrl = installedApp.iconUrl;
+          saveApps();
+          renderApps();
+        }
+      },
+      onFailure: (error) => {
+        console.warn(`Unable to load icon for ${installedApp.name}`, error);
+      }
+    });
+  } catch (error) {
+    console.warn(`Unable to load icon for ${installedApp.name}`, error);
+  }
 }
 
 function renderApps() {
@@ -267,7 +319,7 @@ function loadInstalledApps() {
         id: app.id,
         name: typeof app.title === 'string' && app.title.trim() ? app.title.trim() : app.id,
         icon: typeof app.title === 'string' && app.title.trim() ? app.title.trim().slice(0, 2) : '◉',
-        iconUrl: installedAppIconUrl(app)
+        iconPath: installedAppIconPath(app)
       }))
       .sort((first, second) => first.name.localeCompare(second.name));
     installedAppPicker.replaceChildren();
@@ -282,6 +334,7 @@ function loadInstalledApps() {
     });
     installedAppStatus.textContent = `${installedApps.length} installed apps found.`;
     syncInstalledAppsToHomepage();
+    installedApps.forEach(loadInstalledAppIcon);
     return true;
   };
 
