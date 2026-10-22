@@ -1,5 +1,7 @@
 const STORAGE_KEY = 'tvlauncher.apps.v1';
 const NETFLIX_APP_ID = 'netflix';
+const APP_MANAGER_URI = 'luna://com.webos.applicationManager';
+const APP_MANAGER_LIST_APPS_URI = `${APP_MANAGER_URI}/listApps`;
 const DEFAULT_APPS = [
   { id: 'youtube', name: 'YouTube', icon: '▶', target: 'https://www.youtube.com/', type: 'url' },
   { id: 'netflix', name: 'Netflix', icon: 'N', target: NETFLIX_APP_ID, type: 'app' },
@@ -14,6 +16,9 @@ const appList = document.getElementById('appList');
 const settingsPanel = document.getElementById('settingsPanel');
 const closeSettings = document.getElementById('closeSettings');
 const addAppForm = document.getElementById('addAppForm');
+const installedAppPicker = document.getElementById('installedAppPicker');
+const installedAppStatus = document.getElementById('installedAppStatus');
+const addInstalledAppButton = document.getElementById('addInstalledApp');
 const appNameInput = document.getElementById('appName');
 const appIconInput = document.getElementById('appIcon');
 const appTargetInput = document.getElementById('appTarget');
@@ -29,6 +34,7 @@ const sunStatus = document.getElementById('sunStatus');
 let apps = loadApps();
 let selectedIndex = 0;
 let settingsOpen = false;
+let installedApps = [];
 
 function withLauncherSettings(savedApps) {
   const migratedApps = savedApps.map((app) => (
@@ -146,6 +152,103 @@ function addApp(event) {
   closePanel();
 }
 
+function addInstalledApp() {
+  const selectedApp = installedApps.find((app) => app.id === installedAppPicker.value);
+  if (!selectedApp) return;
+
+  if (apps.some((app) => app.type === 'app' && app.target === selectedApp.id)) {
+    installedAppStatus.textContent = `${selectedApp.name} is already in your launcher.`;
+    return;
+  }
+
+  apps.push({
+    id: `webos-${selectedApp.id}`,
+    name: selectedApp.name,
+    icon: selectedApp.icon,
+    target: selectedApp.id,
+    type: 'app'
+  });
+  selectedIndex = apps.length - 1;
+  saveApps();
+  renderApps();
+  installedAppStatus.textContent = `${selectedApp.name} added to your launcher.`;
+}
+
+function loadInstalledApps() {
+  installedAppPicker.replaceChildren(new Option('Loading installed apps...', ''));
+  addInstalledAppButton.disabled = true;
+  installedAppStatus.textContent = 'Finding installed apps...';
+
+  const handleSuccess = (response) => {
+    if (response?.returnValue === false || !Array.isArray(response?.apps)) {
+      handleFailure(response || new Error('Unexpected app list response.'));
+      return;
+    }
+
+    const availableApps = response.apps;
+    installedApps = availableApps
+      .filter((app) => app && typeof app.id === 'string' && app.id && app.id !== 'com.lgtv.tvlauncher')
+      .map((app) => ({
+        id: app.id,
+        name: typeof app.title === 'string' && app.title.trim() ? app.title.trim() : app.id,
+        icon: typeof app.title === 'string' && app.title.trim() ? app.title.trim().slice(0, 2) : '◉'
+      }))
+      .sort((first, second) => first.name.localeCompare(second.name));
+
+    installedAppPicker.replaceChildren();
+    if (!installedApps.length) {
+      installedAppPicker.add(new Option('No installed apps found', ''));
+      installedAppStatus.textContent = 'The TV did not return any installed apps.';
+      return;
+    }
+
+    installedAppPicker.add(new Option('Choose an app...', ''));
+    installedApps.forEach((app) => {
+      installedAppPicker.add(new Option(`${app.name} (${app.id})`, app.id));
+    });
+    installedAppStatus.textContent = `${installedApps.length} installed apps found.`;
+  };
+
+  const handleFailure = (error) => {
+    console.warn('Unable to list installed webOS apps', error);
+    installedAppPicker.replaceChildren(new Option('Installed app list unavailable', ''));
+    installedAppStatus.textContent = 'Could not read the TV app list. You can still add an app ID below.';
+  };
+
+  if (window.webOS?.service?.request) {
+    try {
+      window.webOS.service.request(APP_MANAGER_URI, {
+        method: 'listApps',
+        parameters: {},
+        onSuccess: handleSuccess,
+        onFailure: handleFailure
+      });
+    } catch (error) {
+      handleFailure(error);
+    }
+    return;
+  }
+
+  if (typeof window.PalmServiceBridge === 'function') {
+    try {
+      const bridge = new window.PalmServiceBridge();
+      bridge.onservicecallback = (message) => {
+        try {
+          handleSuccess(JSON.parse(message));
+        } catch (error) {
+          handleFailure(error);
+        }
+      };
+      bridge.call(APP_MANAGER_LIST_APPS_URI, JSON.stringify({}));
+    } catch (error) {
+      handleFailure(error);
+    }
+    return;
+  }
+
+  handleFailure(new Error('webOS Luna service bridge is unavailable.'));
+}
+
 function removeApp(index) {
   if (apps.length <= 1) return;
 
@@ -191,7 +294,8 @@ function activateApp(app) {
 function openPanel() {
   settingsOpen = true;
   settingsPanel.classList.remove('hidden');
-  appNameInput.focus();
+  loadInstalledApps();
+  installedAppPicker.focus();
 }
 
 function closePanel() {
@@ -321,10 +425,18 @@ function updateNetworkStatus() {
 
 function handleKeyNavigation(event) {
   const key = event.key;
+  const backPressed = key === 'Escape'
+    || key === 'Backspace'
+    || key === 'Back'
+    || key === 'BrowserBack'
+    || key === 'GoBack'
+    || event.keyCode === 461
+    || event.which === 461;
 
-  if (settingsOpen && (key === 'Escape' || key === 'Backspace')) {
+  if (settingsOpen && backPressed) {
     closePanel();
     event.preventDefault();
+    event.stopPropagation();
     return;
   }
 
@@ -355,8 +467,12 @@ function handleKeyNavigation(event) {
 }
 
 closeSettings.addEventListener('click', closePanel);
+addInstalledAppButton.addEventListener('click', addInstalledApp);
+installedAppPicker.addEventListener('change', () => {
+  addInstalledAppButton.disabled = !installedAppPicker.value;
+});
 addAppForm.addEventListener('submit', addApp);
-document.addEventListener('keydown', handleKeyNavigation);
+document.addEventListener('keydown', handleKeyNavigation, true);
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 
@@ -373,5 +489,8 @@ updateClock();
 updateWeather();
 updateNetworkStatus();
 renderApps();
+if (window.webOS?.service?.request || typeof window.PalmServiceBridge === 'function') {
+  loadInstalledApps();
+}
 setInterval(updateClock, 30000);
 setInterval(updateWeather, 900000);
