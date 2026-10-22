@@ -30,16 +30,14 @@
           <div class="status-pill"><span>Sun</span><strong id="sunStatus">--:--</strong></div>
         </div>
 
-        <section id="launcherGrid" class="launcher-grid" aria-label="TV app grid"></section>
+        <section class="app-carousel" aria-labelledby="appsTitle">
+          <div class="carousel-heading">
+            <h1 id="appsTitle">Your apps</h1>
+            <span>Use ← → to browse · Press OK to open</span>
+          </div>
+          <div id="launcherGrid" class="launcher-grid" aria-label="TV app carousel"></div>
+        </section>
       </main>
-
-      <section class="recommendations" aria-labelledby="recommendationsTitle">
-        <div class="recommendations-heading">
-          <h2 id="recommendationsTitle">Netflix picks</h2>
-          <span>Curated picks · each title opens in Netflix · availability varies by region</span>
-        </div>
-        <div id="recommendationsList" class="recommendations-list" aria-label="Netflix title picks"></div>
-      </section>
 
       <aside id="settingsPanel" class="settings-panel hidden" aria-label="TV Launcher settings">
         <div class="panel-header">
