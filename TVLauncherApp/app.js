@@ -72,6 +72,12 @@ function renderApps() {
       renderApps();
       launchApp(apps[index]);
     });
+    tile.addEventListener('focus', () => {
+      selectedIndex = index;
+      appGrid.querySelectorAll('.app-tile').forEach((focusedTile, tileIndex) => {
+        focusedTile.classList.toggle('active', tileIndex === index);
+      });
+    });
 
     appGrid.appendChild(tile);
   });
@@ -177,6 +183,18 @@ function focusGrid() {
   if (target) target.focus();
 }
 
+function focusApp(index) {
+  selectedIndex = Math.max(0, Math.min(index, apps.length - 1));
+  document.querySelectorAll('.app-tile').forEach((tile, tileIndex) => {
+    tile.classList.toggle('active', tileIndex === selectedIndex);
+  });
+  focusGrid();
+}
+
+function getGridColumnCount() {
+  return getComputedStyle(appGrid).gridTemplateColumns.trim().split(/\s+/).length;
+}
+
 function updateClock() {
   const now = new Date();
   dateText.textContent = now.toLocaleDateString(undefined, {
@@ -279,7 +297,6 @@ function updateNetworkStatus() {
 
 function handleKeyNavigation(event) {
   const key = event.key;
-  const tiles = [...document.querySelectorAll('.app-tile')];
 
   if (settingsOpen && (key === 'Escape' || key === 'Backspace')) {
     closePanel();
@@ -289,31 +306,50 @@ function handleKeyNavigation(event) {
 
   if (settingsOpen) return;
 
+  if (document.activeElement === settingsToggle) {
+    if (key === 'ArrowUp' || key === 'ArrowLeft') {
+      focusApp(selectedIndex);
+      event.preventDefault();
+    }
+    return;
+  }
+
+  const currentIndex = document.activeElement.classList.contains('app-tile')
+    ? Number(document.activeElement.dataset.index)
+    : selectedIndex;
+  const columns = getGridColumnCount();
+
   if (key === 'ArrowRight' || key === 'd') {
-    selectedIndex = Math.min(selectedIndex + 1, apps.length - 1);
-    renderApps();
+    if (currentIndex >= apps.length - 1) {
+      settingsToggle.focus();
+    } else {
+      focusApp(currentIndex + 1);
+    }
     event.preventDefault();
   } else if (key === 'ArrowLeft' || key === 'a') {
-    selectedIndex = Math.max(selectedIndex - 1, 0);
-    renderApps();
+    focusApp(currentIndex - 1);
     event.preventDefault();
   } else if (key === 'ArrowDown' || key === 's') {
-    selectedIndex = Math.min(selectedIndex + 2, apps.length - 1);
-    renderApps();
+    if (currentIndex + columns >= apps.length) {
+      settingsToggle.focus();
+    } else {
+      focusApp(currentIndex + columns);
+    }
     event.preventDefault();
   } else if (key === 'ArrowUp' || key === 'w') {
-    selectedIndex = Math.max(selectedIndex - 2, 0);
-    renderApps();
+    focusApp(currentIndex - columns);
     event.preventDefault();
   } else if (key === 'Enter' || key === ' ') {
-    launchApp(apps[selectedIndex]);
-    event.preventDefault();
+    if (document.activeElement.classList.contains('app-tile')) {
+      launchApp(apps[currentIndex]);
+      event.preventDefault();
+    } else {
+      focusGrid();
+    }
   } else if (key === 'm' || key === 'i') {
     openPanel();
     event.preventDefault();
   }
-
-  if (tiles[selectedIndex]) tiles[selectedIndex].focus();
 }
 
 settingsToggle.addEventListener('click', () => settingsOpen ? closePanel() : openPanel());
