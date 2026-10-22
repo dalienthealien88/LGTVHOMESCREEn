@@ -89,7 +89,7 @@ function saveApps() {
 }
 
 function installedAppIconPath(app) {
-  const validPackagePath = /^\/(?:media\/(?:cryptofs|developer)|mnt\/otncabi)\/usr\/palm\/applications\/[A-Za-z0-9._-]+$/;
+  const validPackagePath = /^\/(?:media\/(?:cryptofs|developer)\/apps|mnt\/otncabi)\/usr\/palm\/applications\/[A-Za-z0-9._-]+$/;
   if (typeof app.folderPath !== 'string'
     || !validPackagePath.test(app.folderPath)
     || !app.folderPath.endsWith(`/${app.id}`)) return '';
