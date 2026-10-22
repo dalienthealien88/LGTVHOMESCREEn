@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Homeframe</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <div class="top-bar">
+        <div class="widget clock-widget">
+          <div id="dateText" class="date-text">Loading date...</div>
+          <div id="timeText" class="time-text">--:--</div>
+        </div>
+
+        <div class="widget weather-widget">
+          <div id="weatherIcon" class="weather-icon">☀️</div>
+          <div class="weather-meta">
+            <div id="weatherLocation" class="weather-location">Locating...</div>
+            <div id="weatherTemp" class="weather-temp">--°</div>
+          </div>
+        </div>
+      </div>
+
+      <main class="content">
+        <section class="status-strip">
+          <div class="status-item">
+            <span class="status-label">TV</span>
+            <span id="tvStatus">Ready</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Wi‑Fi</span>
+            <span id="networkStatus">Checking...</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Sun</span>
+            <span id="sunStatus">--:--</span>
+          </div>
+        </section>
+
+        <section id="launcherGrid" class="launcher-grid" aria-label="App launcher"></section>
+      </main>
+
+      <button id="settingsToggle" class="settings-toggle" aria-label="Toggle settings">
+        Settings
+      </button>
+
+      <aside id="settingsPanel" class="settings-panel hidden" aria-label="Homeframe settings">
+        <div class="panel-header">
+          <h2>Launcher settings</h2>
+          <button id="closeSettings" class="ghost-button" aria-label="Close settings">✕</button>
+        </div>
+
+        <form id="addAppForm" class="add-app-form">
+          <label>
+            App name
+            <input id="appName" name="appName" type="text" maxlength="24" placeholder="YouTube" required />
+          </label>
+
+          <label>
+            Icon emoji
+            <input id="appIcon" name="appIcon" type="text" maxlength="2" placeholder="▶" value="▶" />
+          </label>
+
+          <label>
+            URL or app ID
+            <input id="appTarget" name="appTarget" type="text" placeholder="https://www.youtube.com or com.youtube.tv" required />
+          </label>
+
+          <div class="form-row">
+            <label class="checkbox-row">
+              <input id="launchTypeUrl" type="radio" name="launchType" value="url" checked />
+              <span>Open URL</span>
+            </label>
+            <label class="checkbox-row">
+              <input id="launchTypeApp" type="radio" name="launchType" value="app" />
+              <span>App ID</span>
+            </label>
+          </div>
+
+          <button type="submit" class="primary-button">Add app</button>
+        </form>
+
+        <div class="app-list-wrap">
+          <h3>Saved apps</h3>
+          <div id="appList" class="app-list" aria-live="polite"></div>
+        </div>
+      </aside>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
