@@ -16,7 +16,7 @@ A separate, custom TV-friendly launcher built as a new app alongside the existin
 - TV remote Back button closes settings and returns focus to the selected app
 - launches apps through the webOS Application Manager
 
-Installed-app discovery and logo loading use the Homebrew Channel service and require Homebrew root to be enabled. The homepage excludes Bazaar, URL Viewer, Homebrew Channel, LG Input Hook, and TV Launcher itself; the built-in web browser is included despite being a system app. Newly discovered supported apps are added automatically. Weather is fixed to the Isle of Man. Logos are read through Homebrew because the launcher cannot load files directly from other apps' package folders. Hide or restore apps individually in settings.
+Installed-app discovery and logo loading use the Homebrew Channel service and require Homebrew root to be enabled. The homepage includes user apps such as Bazaar, URL Viewer, Homebrew Channel, and LG Input Hook; the launcher itself is excluded, and the built-in web browser is included despite being a system app. Newly discovered supported apps are added automatically and can be hidden individually in settings. D-pad navigation moves through the settings controls and app visibility list. Weather is fixed to the Isle of Man. Logos are read through Homebrew because the launcher cannot load files directly from other apps' package folders.
 
 ## Files
 

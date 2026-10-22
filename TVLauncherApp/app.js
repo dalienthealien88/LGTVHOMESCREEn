@@ -6,13 +6,7 @@ const APP_MANAGER_LIST_APPS_COMMAND = 'luna-send -n 1 luna://com.webos.applicati
 const APP_MANAGER_LIST_APPS_METHODS = ['dev/listApps', 'listApps'];
 const BROWSER_APP_ID = 'com.webos.app.browser';
 const LG_HOME_APP_ID = 'com.webos.app.home';
-const EXCLUDED_APP_IDS = new Set([
-  'com.homeframe.launcher',
-  'com.lgtv.urlviewer',
-  'org.webosbrew.hbchannel',
-  'org.webosbrew.inputhook',
-  'com.lgtv.tvlauncher'
-]);
+const LAUNCHER_APP_ID = 'com.lgtv.tvlauncher';
 const LEGACY_DEFAULT_APP_IDS = new Set(['youtube', 'netflix', 'spotify', 'settings', 'browser', 'music']);
 const appGrid = document.getElementById('launcherGrid');
 const appList = document.getElementById('appList');
@@ -212,6 +206,9 @@ function renderApps() {
 }
 
 function renderSavedApps() {
+  const focusedAppId = appList.contains(document.activeElement)
+    ? document.activeElement.dataset.appId
+    : null;
   appList.innerHTML = '';
   const homeApps = [
     ...installedApps.map((app) => ({
@@ -272,6 +269,12 @@ function renderSavedApps() {
     emptyState.textContent = 'No supported apps were found.';
     appList.appendChild(emptyState);
   }
+
+  if (focusedAppId) {
+    [...appList.querySelectorAll('input[type="checkbox"]')]
+      .find((checkbox) => checkbox.dataset.appId === focusedAppId)
+      ?.focus();
+  }
 }
 
 function syncInstalledAppsToHomepage() {
@@ -307,7 +310,7 @@ function loadInstalledApps() {
       .filter((app) => app
         && typeof app.id === 'string'
         && app.id
-        && !EXCLUDED_APP_IDS.has(app.id)
+        && app.id !== LAUNCHER_APP_ID
         && (app.systemApp !== true || app.id === BROWSER_APP_ID))
       .map((app) => ({
         id: app.id,
@@ -626,7 +629,27 @@ function handleKeyNavigation(event) {
     return;
   }
 
-  if (settingsOpen) return;
+  if (settingsOpen) {
+    const controls = [closeSettings, ...appList.querySelectorAll('input[type="checkbox"]'), returnHomeButton];
+    const activeIndex = controls.indexOf(document.activeElement);
+
+    if (key === 'ArrowDown' || key === 'ArrowRight') {
+      controls[Math.min(activeIndex + 1, controls.length - 1)]?.focus();
+      document.activeElement.scrollIntoView?.({ block: 'nearest' });
+      event.preventDefault();
+    } else if (key === 'ArrowUp' || key === 'ArrowLeft') {
+      controls[Math.max(activeIndex - 1, 0)]?.focus();
+      document.activeElement.scrollIntoView?.({ block: 'nearest' });
+      event.preventDefault();
+    } else if ((key === 'Enter' || key === ' ') && document.activeElement.matches('input[type="checkbox"]')) {
+      document.activeElement.click();
+      event.preventDefault();
+    } else if ((key === 'Enter' || key === ' ') && document.activeElement.matches('button')) {
+      document.activeElement.click();
+      event.preventDefault();
+    }
+    return;
+  }
 
   const activeElement = document.activeElement;
   if (activeElement === openSettingsButton && key === 'ArrowLeft') {
