@@ -1,36 +1,18 @@
-# Homeframe custom launcher
+# The Bazaar for webOS
 
-This app is a custom LG webOS-style launcher designed for a TV remote. It includes:
+A remote-friendly home screen for The Bazaar on LG webOS. The app keeps its own UI lightweight and opens Bazaar destinations using the hosted site's compatibility-mode routes where available. Games and game stats open their actual full-interface routes. Sign in opens The Bazaar's own same-origin login page, so the server's cross-site request protection accepts the login and manages the session. This app does not collect, save, or submit credentials.
 
-- full-screen, remote-friendly app grid
-- settings menu anchored in the bottom-right
-- add/remove app shortcuts with local storage persistence
-- clock and date widget
-- weather widget using the browser location and Open-Meteo
-- quick network/TV status and sunrise/sunset info
-- keyboard and D-pad-friendly navigation
+## Build
 
-## Files
+Run `python HomeframeApp/build-ipk.py` from the repository root. The script packages the webOS app as `Homeframe.ipk` and updates the SHA-256 in `homeframe.manifest.json`.
 
-- `index.html` — app structure
-- `styles.css` — full-screen launcher styling
-- `app.js` — clock, weather, launcher logic, remote navigation, persistent apps
-- `appinfo.json` — metadata for webOS packaging
-- `icon.svg` — launcher icon
+## Remote controls
 
-## Usage
+- Arrow keys / D-pad: move between destinations.
+- OK / Enter: open the selected Bazaar section.
+- Choose **Sign in** in the top bar to sign in on The Bazaar.
+- Back: return from the Bazaar site to this screen using webOS navigation.
 
-Open `index.html` in a browser for local testing, or package it as a webOS app and assign the custom button mapping you mentioned for direct launch.
+## Network note
 
-## Remote behavior
-
-- Arrow keys / D-pad: move focus
-- OK / Enter: launch the focused app
-- Settings button or `M` key: open settings
-- Escape / Back: close settings
-
-## Notes
-
-- App links work best when the target is a URL.
-- App IDs can be used for webOS app launches when supported by your environment.
-- Weather is fetched anonymously from Open-Meteo and uses browser geolocation if available.
+The configured Bazaar server uses HTTP. Use it only on a trusted network. Sign in on the TV; browser sessions are separate. The app intentionally does not store passwords.

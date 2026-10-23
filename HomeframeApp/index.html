@@ -3,92 +3,62 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Homeframe</title>
+    <meta name="theme-color" content="#090d14" />
+    <title>The Bazaar</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="app-shell">
-      <div class="top-bar">
-        <div class="widget clock-widget">
-          <div id="dateText" class="date-text">Loading date...</div>
-          <div id="timeText" class="time-text">--:--</div>
+      <header class="topbar">
+        <a class="brand" href="http://thebazaar.duckdns.org:9999/?compat=on" aria-label="The Bazaar home">
+          <span class="brand-mark" aria-hidden="true">B</span>
+          <span>THE <strong>BAZAAR</strong></span>
+        </a>
+        <div class="header-meta">
+          <span id="connectionStatus" class="connection-status"><span class="status-dot"></span>Checking connection</span>
+          <time id="clock" class="clock">--:--</time>
+          <a id="openSignIn" class="sign-in-toggle" href="http://thebazaar.duckdns.org:9999/?compat=on&amp;view=login">Sign in</a>
         </div>
+      </header>
 
-        <div class="widget weather-widget" aria-live="polite">
-          <div id="weatherIcon" class="weather-icon" aria-hidden="true">☀️</div>
-          <div class="weather-meta">
-            <div id="weatherLocation" class="weather-location">Locating...</div>
-            <div id="weatherTemp" class="weather-temp">--°</div>
+      <main>
+        <section class="hero" aria-labelledby="heroTitle">
+          <div class="hero-copy">
+            <span class="eyebrow">YOUR ENTERTAINMENT, TOGETHER</span>
+            <h1 id="heroTitle">One home for<br />everything you love.</h1>
+            <p>Movies, shows, live TV and games — browse The Bazaar with your TV remote.</p>
+            <button id="openBazaar" class="primary-action" type="button">
+              <span aria-hidden="true">▶</span>
+              Open The Bazaar
+              <span class="action-arrow" aria-hidden="true">→</span>
+            </button>
           </div>
-        </div>
-      </div>
-
-      <main class="content">
-        <section class="status-strip" aria-label="Home details">
-          <div class="status-item">
-            <span class="status-label">TV</span>
-            <span id="tvStatus">Ready</span>
-          </div>
-          <div class="status-item">
-            <span class="status-label">Wi‑Fi</span>
-            <span id="networkStatus">Checking...</span>
-          </div>
-          <div class="status-item">
-            <span class="status-label">Sun</span>
-            <span id="sunStatus">--:--</span>
+          <div class="hero-art" aria-hidden="true">
+            <div class="art-orbit orbit-one"></div>
+            <div class="art-orbit orbit-two"></div>
+            <div class="art-disc"><span>B</span></div>
+            <div class="art-glow"></div>
           </div>
         </section>
 
-        <section id="launcherGrid" class="launcher-grid" aria-label="App launcher"></section>
+        <section class="browse" aria-labelledby="browseTitle">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">JUMP RIGHT IN</span>
+              <h2 id="browseTitle">Browse The Bazaar</h2>
+            </div>
+            <span class="remote-hint">← → ↑ ↓ Browse <span>·</span> OK Select</span>
+          </div>
+          <div id="destinationGrid" class="destination-grid" aria-label="Bazaar destinations"></div>
+        </section>
       </main>
 
-      <button id="settingsToggle" class="settings-toggle" aria-label="Toggle settings">
-        Settings
-      </button>
-
-      <aside id="settingsPanel" class="settings-panel hidden" aria-label="Homeframe settings">
-        <div class="panel-header">
-          <h2>Launcher settings</h2>
-          <button id="closeSettings" class="ghost-button" aria-label="Close settings">✕</button>
-        </div>
-
-        <form id="addAppForm" class="add-app-form">
-          <label>
-            App name
-            <input id="appName" name="appName" type="text" maxlength="24" placeholder="YouTube" required />
-          </label>
-
-          <label>
-            Icon emoji
-            <input id="appIcon" name="appIcon" type="text" maxlength="2" placeholder="▶" value="▶" />
-          </label>
-
-          <label>
-            URL or app ID
-            <input id="appTarget" name="appTarget" type="text" placeholder="https://www.youtube.com or com.youtube.tv" required />
-          </label>
-
-          <div class="form-row">
-            <label class="checkbox-row">
-              <input id="launchTypeUrl" type="radio" name="launchType" value="url" checked />
-              <span>Open URL</span>
-            </label>
-            <label class="checkbox-row">
-              <input id="launchTypeApp" type="radio" name="launchType" value="app" />
-              <span>App ID</span>
-            </label>
-          </div>
-
-          <button type="submit" class="primary-button">Add app</button>
-        </form>
-
-        <div class="app-list-wrap">
-          <h3>Saved apps</h3>
-          <div id="appList" class="app-list" aria-live="polite"></div>
-        </div>
-      </aside>
+      <footer class="footer">
+        <span>Sign in to access your library and personal features.</span>
+        <span class="network-note">The Bazaar manages sign-in and your session</span>
+      </footer>
+      <div id="launchStatus" class="launch-status" role="status" aria-live="polite"></div>
     </div>
-
     <script src="app.js"></script>
   </body>
 </html>

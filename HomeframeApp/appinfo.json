@@ -1,12 +1,13 @@
 {
   "id": "com.homeframe.launcher",
-  "version": "1.0.0",
-  "title": "Homeframe",
+  "version": "3.2.1",
+  "title": "The Bazaar",
+  "appDescription": "Remote-friendly Bazaar TV client using the site's own sign-in",
   "type": "web",
   "main": "index.html",
   "icon": "icon.svg",
   "largeIcon": "icon.svg",
-  "splashBackground": "#07131d",
+  "splashBackground": "#090d14",
   "allowAudioPlayback": true,
   "disableBackHistoryAPI": false
 }
