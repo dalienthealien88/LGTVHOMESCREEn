@@ -2,7 +2,7 @@
 
 ## The Bazaar
 
-A full-screen webOS app that opens The Bazaar in compatibility mode, which uses the site's TV-oriented navigation. Sign in on The Bazaar page so the site handles its own login and session; the app does not collect or store passwords.
+A full-screen webOS app that opens `http://thebazaar.duckdns.org:9999/` directly. The website handles its own sign-in and the TV keeps its session; the app does not collect or store passwords.
 
 ## Install or update
 
