@@ -1,18 +1,9 @@
-# The Bazaar for webOS
+# The Bazaar
 
-A remote-friendly home screen for The Bazaar on LG webOS. The app keeps its own UI lightweight and opens Bazaar destinations using the hosted site's compatibility-mode routes where available. Games and game stats open their actual full-interface routes. Sign in opens The Bazaar's own same-origin login page, so the server's cross-site request protection accepts the login and manages the session. This app does not collect, save, or submit credentials.
+The Bazaar is a full-screen webOS app that opens `http://thebazaar.duckdns.org:9999/` directly when launched. The website handles its own sign-in; the app does not collect or store passwords, and the TV keeps its web session.
 
-## Build
+The site uses HTTP. Use it only on a trusted home network.
 
-Run `python HomeframeApp/build-ipk.py` from the repository root. The script packages the webOS app as `Homeframe.ipk` and updates the SHA-256 in `homeframe.manifest.json`.
+## Packaging
 
-## Remote controls
-
-- Arrow keys / D-pad: move between destinations.
-- OK / Enter: open the selected Bazaar section.
-- Choose **Sign in** in the top bar to sign in on The Bazaar.
-- Back: return from the Bazaar site to this screen using webOS navigation.
-
-## Network note
-
-The configured Bazaar server uses HTTP. Use it only on a trusted network. Sign in on the TV; browser sessions are separate. The app intentionally does not store passwords.
+Run `python HomeframeApp/build-ipk.py` from the repository root to build `Homeframe.ipk` and update the SHA-256 hash in `homeframe.manifest.json`.
