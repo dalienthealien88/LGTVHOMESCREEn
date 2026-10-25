@@ -1,15 +1,18 @@
 {
   "id": "com.homeframe.launcher",
-  "version": "3.0.12",
+  "version": "3.2.2",
   "vendor": "Homeframe",
   "title": "The Bazaar",
   "type": "web",
   "main": "index.html",
-  "icon": "bazaar-logo-3.0.11-80.png",
-  "largeIcon": "bazaar-logo-3.0.11-130.png",
-  "appDescription": "Opens The Bazaar homepage in a full-screen webOS app",
+  "icon": "icon.svg",
+  "largeIcon": "icon.svg",
+  "appDescription": "Opens The Bazaar homepage directly in a full-screen webOS app",
   "resolution": "1920x1080",
   "requiredMemory": 16,
   "transparent": false,
-  "requiredACG": []
+  "requiredACG": [],
+  "splashBackground": "#090d14",
+  "allowAudioPlayback": true,
+  "disableBackHistoryAPI": false
 }

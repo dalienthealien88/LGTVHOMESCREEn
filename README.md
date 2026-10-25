@@ -2,15 +2,15 @@
 
 ## The Bazaar
 
-A full-screen webOS app that opens `http://thebazaar.duckdns.org:9999/` directly. The website handles its own sign-in and the TV keeps its session; the app does not collect or store passwords.
+The Bazaar is a full-screen webOS app that opens `http://thebazaar.duckdns.org:9999/` directly when launched. Sign in on the website; the app does not collect or store passwords, and the TV keeps its web session.
 
 ## Install or update
 
-In Homebrew Channel, refresh the repository and choose Update for The Bazaar (app ID `com.homeframe.launcher`). The repository URL is:
+In Homebrew Channel, refresh the repository and choose Update for The Bazaar (app ID `com.homeframe.launcher`). The app opens the website directly on launch. The repository URL is:
 
 `https://raw.githubusercontent.com/dalienthealien88/LGTVHOMESCREEn/main/repo.json`
 
-Use the remote arrows to focus Username and Password, press OK to type, then select Sign in. The TV keeps its own Bazaar session; desktop browser sessions are separate. The NAS page uses HTTP, so use it only on a trusted home network.
+The site uses HTTP. Use it only on a trusted home network.
 
 ## URL Viewer
 
